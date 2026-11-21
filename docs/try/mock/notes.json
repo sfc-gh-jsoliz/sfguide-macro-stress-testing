@@ -1,0 +1,2731 @@
+[
+ {
+  "tier": "All tiers",
+  "fedBps": 50,
+  "unPp": 0.5,
+  "injected": false,
+  "facts": [
+   {
+    "id": "F1",
+    "label": "As-of month",
+    "value": "2026-06",
+    "source": "MACRO_STRESS_BENCHMARK"
+   },
+   {
+    "id": "F2",
+    "label": "Scenario",
+    "value": "+50 bps Fed funds, +0.5 pp unemployment",
+    "source": "app input"
+   },
+   {
+    "id": "F3",
+    "label": "Fed funds, baseline -> scenario",
+    "value": "4.30% -> 4.80%",
+    "source": "MACRO_STRESS_INDICATORS"
+   },
+   {
+    "id": "F4",
+    "label": "Unemployment, baseline -> scenario",
+    "value": "4.20% -> 4.70%",
+    "source": "MACRO_STRESS_INDICATORS"
+   },
+   {
+    "id": "F5",
+    "label": "Consumer sentiment, baseline -> modeled",
+    "value": "70.0 -> 67.2",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F6",
+    "label": "Monthly volume, the whole book, baseline -> scenario",
+    "value": "$5.03B -> $4.96B",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F7",
+    "label": "Approval rate (volume-weighted), the whole book",
+    "value": "89.76% -> 89.37%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F8",
+    "label": "30-day delinquency (credit products), the whole book",
+    "value": "3.08% -> 3.46%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F9",
+    "label": "Charge-off (credit products), the whole book",
+    "value": "1.79% -> 2.06%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F10",
+    "label": "Pools in Breach / Watch, the whole book",
+    "value": "0 / 0",
+    "source": "MACRO_STRESS_APPETITE"
+   },
+   {
+    "id": "F11",
+    "label": "Deep-subprime BNPL: charge-off baseline -> scenario (limit), status",
+    "value": "8.48% -> 9.48% (limit 12.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F12",
+    "label": "Deep-subprime Credit card: charge-off baseline -> scenario (limit), status",
+    "value": "7.63% -> 8.63% (limit 12.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F13",
+    "label": "Subprime BNPL: charge-off baseline -> scenario (limit), status",
+    "value": "4.03% -> 4.63% (limit 7.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F14",
+    "label": "Subprime Credit card: charge-off baseline -> scenario (limit), status",
+    "value": "3.37% -> 3.97% (limit 7.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F15",
+    "label": "Near-prime BNPL: charge-off baseline -> scenario (limit), status",
+    "value": "1.29% -> 1.49% (limit 3.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F16",
+    "label": "Near-prime Credit card: charge-off baseline -> scenario (limit), status",
+    "value": "1.19% -> 1.39% (limit 3.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F17",
+    "label": "Prime BNPL: charge-off baseline -> scenario (limit), status",
+    "value": "0.40% -> 0.45% (limit 1.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F18",
+    "label": "Prime Credit card: charge-off baseline -> scenario (limit), status",
+    "value": "0.30% -> 0.35% (limit 1.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F19",
+    "label": "Holiday peak, the whole book: December 2025 vs October 2025 volume",
+    "value": "$6.14B vs $4.94B (+24.3%)",
+    "source": "MACRO_STRESS_BENCHMARK"
+   },
+   {
+    "id": "F20",
+    "label": "Post-holiday delinquency, the whole book: January 2026 vs December 2025",
+    "value": "4.02% vs 3.26%",
+    "source": "MACRO_STRESS_BENCHMARK"
+   }
+  ],
+  "draft": "# Stress Test: +50 bps Fed Funds, +0.5 pp Unemployment\n\n**Under the +50 bps Fed funds, +0.5 pp unemployment scenario [F2], charge-off rises from 1.79% to 2.06% and delinquency from 3.08% to 3.46%, with all pools remaining Within appetite.**\n\n| Metric | Baseline | Scenario | Fact |\n|--------|----------|----------|------|\n| Monthly volume (whole book) | $5.03B | $4.96B | [F6] |\n| Approval rate (volume-weighted, whole book) | 89.76% | 89.37% | [F7] |\n| 30-day delinquency (credit products, whole book) | 3.08% | 3.46% | [F8] |\n| Charge-off (credit products, whole book) | 1.79% | 2.06% | [F9] |\n\n## What moves\n\n- Deep-subprime BNPL charge-off rises from 8.48% to 9.48% (limit 12.0%) and deep-subprime Credit card from 7.63% to 8.63% (limit 12.0%), both Within appetite [F11] [F12], representing the most stressed pools with 0 / 0 pools in Breach / Watch [F10].\n\n- December 2025 volume reached $6.14B versus $4.94B in October 2025 (+24.3%) [F19], reflecting the holiday peak effect on the whole book.\n\n- Post-holiday delinquency for January 2026 reached 4.02% versus 3.26% in December 2025 [F20] for the whole book.\n\n## Data coverage\n\nAs-of month: 2026-06 [F1]; sources: MACRO_STRESS_BENCHMARK, app input, MACRO_STRESS_INDICATORS, MACRO_STRESS_SCENARIO, MACRO_STRESS_APPETITE [F1] [F2] [F3] [F4] [F5] [F6] [F7] [F8] [F9] [F10] [F11] [F12] [F13] [F14] [F15] [F16] [F17] [F18] [F19] [F20].",
+  "verdict": {
+   "status": "verified",
+   "residual_hedges": 0,
+   "claims_checked": 32,
+   "edits": []
+  },
+  "latencyMs": 7686,
+  "preset": "Mild"
+ },
+ {
+  "tier": "Prime",
+  "fedBps": 50,
+  "unPp": 0.5,
+  "injected": false,
+  "facts": [
+   {
+    "id": "F1",
+    "label": "As-of month",
+    "value": "2026-06",
+    "source": "MACRO_STRESS_BENCHMARK"
+   },
+   {
+    "id": "F2",
+    "label": "Scenario",
+    "value": "+50 bps Fed funds, +0.5 pp unemployment",
+    "source": "app input"
+   },
+   {
+    "id": "F3",
+    "label": "Fed funds, baseline -> scenario",
+    "value": "4.30% -> 4.80%",
+    "source": "MACRO_STRESS_INDICATORS"
+   },
+   {
+    "id": "F4",
+    "label": "Unemployment, baseline -> scenario",
+    "value": "4.20% -> 4.70%",
+    "source": "MACRO_STRESS_INDICATORS"
+   },
+   {
+    "id": "F5",
+    "label": "Consumer sentiment, baseline -> modeled",
+    "value": "70.0 -> 67.2",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F6",
+    "label": "Monthly volume, the Prime tier, baseline -> scenario",
+    "value": "$2.05B -> $2.03B",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F7",
+    "label": "Approval rate (volume-weighted), the Prime tier",
+    "value": "96.87% -> 96.77%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F8",
+    "label": "30-day delinquency (credit products), the Prime tier",
+    "value": "0.93% -> 1.03%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F9",
+    "label": "Charge-off (credit products), the Prime tier",
+    "value": "0.31% -> 0.36%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F10",
+    "label": "Pools in Breach / Watch, the Prime tier",
+    "value": "0 / 0",
+    "source": "MACRO_STRESS_APPETITE"
+   },
+   {
+    "id": "F11",
+    "label": "Prime BNPL: charge-off baseline -> scenario (limit), status",
+    "value": "0.40% -> 0.45% (limit 1.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F12",
+    "label": "Prime Credit card: charge-off baseline -> scenario (limit), status",
+    "value": "0.30% -> 0.35% (limit 1.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F13",
+    "label": "Holiday peak, the Prime tier: December 2025 vs October 2025 volume",
+    "value": "$2.44B vs $1.99B (+22.4%)",
+    "source": "MACRO_STRESS_BENCHMARK"
+   },
+   {
+    "id": "F14",
+    "label": "Post-holiday delinquency, the Prime tier: January 2026 vs December 2025",
+    "value": "1.23% vs 1.00%",
+    "source": "MACRO_STRESS_BENCHMARK"
+   }
+  ],
+  "draft": "# Prime Tier Stress Assessment\n\n**Under a +50 bps Fed funds and +0.5 pp unemployment scenario, the Prime tier remains within appetite with charge-off rising 5 basis points to 0.36%.**\n\n| Metric | Baseline | Scenario | Fact |\n|--------|----------|----------|------|\n| Monthly volume | $2.05B [F6] | $2.03B [F6] | F6 |\n| Approval rate (volume-weighted) | 96.87% [F7] | 96.77% [F7] | F7 |\n| 30-day delinquency | 0.93% [F8] | 1.03% [F8] | F8 |\n| Charge-off | 0.31% [F9] | 0.36% [F9] | F9 |\n\n## What moves\n\n- Prime BNPL and Prime Credit card pools show stress to 0.45% [F11] and 0.35% [F12] charge-off but remain Within appetite [F11] [F12] against 1.0% [F11] [F12] limits with 0 / 0 [F10] in Breach / Watch.\n\n- December 2025 holiday volume reached $2.44B [F13] versus $1.99B [F13] in October 2025, a +22.4% [F13] lift.\n\n- January 2026 post-holiday delinquency increased to 1.23% [F14] from 1.00% [F14] in December 2025.\n\n## Data coverage\n\nAs-of month: 2026-06 [F1]; sources: MACRO_STRESS_BENCHMARK [F1] [F13] [F14], app input [F2], MACRO_STRESS_INDICATORS [F3] [F4], MACRO_STRESS_SCENARIO [F5] [F6] [F7] [F8] [F9] [F11] [F12], MACRO_STRESS_APPETITE [F10].",
+  "verdict": {
+   "status": "verified",
+   "residual_hedges": 0,
+   "claims_checked": 24,
+   "edits": []
+  },
+  "latencyMs": 7662,
+  "preset": "Mild"
+ },
+ {
+  "tier": "Near-prime",
+  "fedBps": 50,
+  "unPp": 0.5,
+  "injected": false,
+  "facts": [
+   {
+    "id": "F1",
+    "label": "As-of month",
+    "value": "2026-06",
+    "source": "MACRO_STRESS_BENCHMARK"
+   },
+   {
+    "id": "F2",
+    "label": "Scenario",
+    "value": "+50 bps Fed funds, +0.5 pp unemployment",
+    "source": "app input"
+   },
+   {
+    "id": "F3",
+    "label": "Fed funds, baseline -> scenario",
+    "value": "4.30% -> 4.80%",
+    "source": "MACRO_STRESS_INDICATORS"
+   },
+   {
+    "id": "F4",
+    "label": "Unemployment, baseline -> scenario",
+    "value": "4.20% -> 4.70%",
+    "source": "MACRO_STRESS_INDICATORS"
+   },
+   {
+    "id": "F5",
+    "label": "Consumer sentiment, baseline -> modeled",
+    "value": "70.0 -> 67.2",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F6",
+    "label": "Monthly volume, the Near-prime tier, baseline -> scenario",
+    "value": "$1.43B -> $1.41B",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F7",
+    "label": "Approval rate (volume-weighted), the Near-prime tier",
+    "value": "90.76% -> 90.46%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F8",
+    "label": "30-day delinquency (credit products), the Near-prime tier",
+    "value": "2.67% -> 2.97%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F9",
+    "label": "Charge-off (credit products), the Near-prime tier",
+    "value": "1.22% -> 1.42%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F10",
+    "label": "Pools in Breach / Watch, the Near-prime tier",
+    "value": "0 / 0",
+    "source": "MACRO_STRESS_APPETITE"
+   },
+   {
+    "id": "F11",
+    "label": "Near-prime BNPL: charge-off baseline -> scenario (limit), status",
+    "value": "1.29% -> 1.49% (limit 3.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F12",
+    "label": "Near-prime Credit card: charge-off baseline -> scenario (limit), status",
+    "value": "1.19% -> 1.39% (limit 3.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F13",
+    "label": "Holiday peak, the Near-prime tier: December 2025 vs October 2025 volume",
+    "value": "$1.77B vs $1.43B (+24.1%)",
+    "source": "MACRO_STRESS_BENCHMARK"
+   },
+   {
+    "id": "F14",
+    "label": "Post-holiday delinquency, the Near-prime tier: January 2026 vs December 2025",
+    "value": "3.52% vs 2.58%",
+    "source": "MACRO_STRESS_BENCHMARK"
+   }
+  ],
+  "draft": "# Near-Prime Stress Note\n\n**Under the Fed funds +50 bps and unemployment +0.5 pp scenario, the Near-prime tier sees charge-offs rise to 1.42% with all pools within appetite.**\n\n| Metric | Baseline | Scenario | Fact |\n|--------|----------|----------|------|\n| Monthly volume | $1.43B [F6] | $1.41B [F6] | F6 |\n| Approval rate (volume-weighted) | 90.76% [F7] | 90.46% [F7] | F7 |\n| 30-day delinquency (credit products) | 2.67% [F8] | 2.97% [F8] | F8 |\n| Charge-off (credit products) | 1.22% [F9] | 1.42% [F9] | F9 |\n\n## What moves\n\n- Near-prime BNPL stressed to 1.49% [F11] charge-off (limit 3.0% [F11], Within appetite [F11]) and Near-prime Credit card stressed to 1.39% [F12] charge-off (limit 3.0% [F12], Within appetite [F12]), with 0 [F10] pools in Breach and 0 [F10] in Watch.\n\n- December 2025 [F13] holiday peak volume reached $1.77B [F13] vs October 2025 [F13] $1.43B [F13], a +24.1% [F13] increase.\n\n- January 2026 [F14] post-holiday delinquency rose to 3.52% [F14] from December 2025 [F14] 2.58% [F14].\n\n## Data coverage\n\nAs-of month: 2026-06 [F1]; sources: MACRO_STRESS_BENCHMARK [F1], app input [F2], MACRO_STRESS_INDICATORS [F3], MACRO_STRESS_SCENARIO [F6], MACRO_STRESS_APPETITE [F10].",
+  "verdict": {
+   "status": "verified",
+   "residual_hedges": 0,
+   "claims_checked": 24,
+   "edits": []
+  },
+  "latencyMs": 7095,
+  "preset": "Mild"
+ },
+ {
+  "tier": "Subprime",
+  "fedBps": 50,
+  "unPp": 0.5,
+  "injected": false,
+  "facts": [
+   {
+    "id": "F1",
+    "label": "As-of month",
+    "value": "2026-06",
+    "source": "MACRO_STRESS_BENCHMARK"
+   },
+   {
+    "id": "F2",
+    "label": "Scenario",
+    "value": "+50 bps Fed funds, +0.5 pp unemployment",
+    "source": "app input"
+   },
+   {
+    "id": "F3",
+    "label": "Fed funds, baseline -> scenario",
+    "value": "4.30% -> 4.80%",
+    "source": "MACRO_STRESS_INDICATORS"
+   },
+   {
+    "id": "F4",
+    "label": "Unemployment, baseline -> scenario",
+    "value": "4.20% -> 4.70%",
+    "source": "MACRO_STRESS_INDICATORS"
+   },
+   {
+    "id": "F5",
+    "label": "Consumer sentiment, baseline -> modeled",
+    "value": "70.0 -> 67.2",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F6",
+    "label": "Monthly volume, the Subprime tier, baseline -> scenario",
+    "value": "$994.9M -> $978.5M",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F7",
+    "label": "Approval rate (volume-weighted), the Subprime tier",
+    "value": "80.32% -> 79.62%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F8",
+    "label": "30-day delinquency (credit products), the Subprime tier",
+    "value": "5.92% -> 6.72%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F9",
+    "label": "Charge-off (credit products), the Subprime tier",
+    "value": "3.59% -> 4.19%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F10",
+    "label": "Pools in Breach / Watch, the Subprime tier",
+    "value": "0 / 0",
+    "source": "MACRO_STRESS_APPETITE"
+   },
+   {
+    "id": "F11",
+    "label": "Subprime BNPL: charge-off baseline -> scenario (limit), status",
+    "value": "4.03% -> 4.63% (limit 7.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F12",
+    "label": "Subprime Credit card: charge-off baseline -> scenario (limit), status",
+    "value": "3.37% -> 3.97% (limit 7.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F13",
+    "label": "Holiday peak, the Subprime tier: December 2025 vs October 2025 volume",
+    "value": "$1.25B vs $974.7M (+28.3%)",
+    "source": "MACRO_STRESS_BENCHMARK"
+   },
+   {
+    "id": "F14",
+    "label": "Post-holiday delinquency, the Subprime tier: January 2026 vs December 2025",
+    "value": "8.06% vs 6.40%",
+    "source": "MACRO_STRESS_BENCHMARK"
+   }
+  ],
+  "draft": "# Subprime Stress: Fed +50bps, Unemployment +0.5pp\n\n**Charge-offs rise 60 basis points to 4.19% [F9] under stress, but all pools remain within appetite.**\n\n| Metric | Baseline | Scenario | Fact |\n|--------|----------|----------|------|\n| Monthly volume | $994.9M | $978.5M | [F6] |\n| Approval rate | 80.32% | 79.62% | [F7] |\n| 30-day delinquency | 5.92% | 6.72% | [F8] |\n| Charge-off | 3.59% | 4.19% | [F9] |\n\n## What moves\n\n- **Subprime BNPL** and **Subprime Credit card** are the most stressed pools with charge-offs rising to 4.63% [F11] and 3.97% [F12] respectively, both remain Within appetite against 7.0% limits [F11] [F12]; 0 pools in Breach, 0 in Watch [F10].\n\n- Holiday-season volume peaked at $1.25B in December 2025 vs $974.7M in October 2025 (+28.3%) [F13].\n\n- Post-holiday delinquency lifted to 8.06% in January 2026 vs 6.40% in December 2025 [F14].\n\n## Data coverage\nAs-of month: 2026-06 [F1]; sources: MACRO_STRESS_BENCHMARK, app input, MACRO_STRESS_INDICATORS, MACRO_STRESS_SCENARIO, MACRO_STRESS_APPETITE [F1] [F2] [F3] [F6] [F10].",
+  "verdict": {
+   "status": "verified",
+   "residual_hedges": 0,
+   "claims_checked": 20,
+   "edits": []
+  },
+  "latencyMs": 7123,
+  "preset": "Mild"
+ },
+ {
+  "tier": "Deep-subprime",
+  "fedBps": 50,
+  "unPp": 0.5,
+  "injected": false,
+  "facts": [
+   {
+    "id": "F1",
+    "label": "As-of month",
+    "value": "2026-06",
+    "source": "MACRO_STRESS_BENCHMARK"
+   },
+   {
+    "id": "F2",
+    "label": "Scenario",
+    "value": "+50 bps Fed funds, +0.5 pp unemployment",
+    "source": "app input"
+   },
+   {
+    "id": "F3",
+    "label": "Fed funds, baseline -> scenario",
+    "value": "4.30% -> 4.80%",
+    "source": "MACRO_STRESS_INDICATORS"
+   },
+   {
+    "id": "F4",
+    "label": "Unemployment, baseline -> scenario",
+    "value": "4.20% -> 4.70%",
+    "source": "MACRO_STRESS_INDICATORS"
+   },
+   {
+    "id": "F5",
+    "label": "Consumer sentiment, baseline -> modeled",
+    "value": "70.0 -> 67.2",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F6",
+    "label": "Monthly volume, the Deep-subprime tier, baseline -> scenario",
+    "value": "$556.7M -> $546.0M",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F7",
+    "label": "Approval rate (volume-weighted), the Deep-subprime tier",
+    "value": "77.92% -> 76.82%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F8",
+    "label": "30-day delinquency (credit products), the Deep-subprime tier",
+    "value": "9.92% -> 11.22%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F9",
+    "label": "Charge-off (credit products), the Deep-subprime tier",
+    "value": "7.95% -> 8.95%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F10",
+    "label": "Pools in Breach / Watch, the Deep-subprime tier",
+    "value": "0 / 0",
+    "source": "MACRO_STRESS_APPETITE"
+   },
+   {
+    "id": "F11",
+    "label": "Deep-subprime BNPL: charge-off baseline -> scenario (limit), status",
+    "value": "8.48% -> 9.48% (limit 12.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F12",
+    "label": "Deep-subprime Credit card: charge-off baseline -> scenario (limit), status",
+    "value": "7.63% -> 8.63% (limit 12.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F13",
+    "label": "Holiday peak, the Deep-subprime tier: December 2025 vs October 2025 volume",
+    "value": "$676.7M vs $543.1M (+24.6%)",
+    "source": "MACRO_STRESS_BENCHMARK"
+   },
+   {
+    "id": "F14",
+    "label": "Post-holiday delinquency, the Deep-subprime tier: January 2026 vs December 2025",
+    "value": "12.12% vs 10.66%",
+    "source": "MACRO_STRESS_BENCHMARK"
+   }
+  ],
+  "draft": "# Deep-Subprime Stress Assessment\n\n**Under the modeled stress scenario, Deep-subprime charge-offs rise 100 basis points to 8.95%, while both BNPL and Credit card pools remain within appetite thresholds.**\n\n| Metric | Baseline | Scenario | Fact |\n|--------|----------|----------|------|\n| Monthly volume | $556.7M [F6] | $546.0M [F6] | F6 |\n| Approval rate (volume-weighted) | 77.92% [F7] | 76.82% [F7] | F7 |\n| 30-day delinquency (credit products) | 9.92% [F8] | 11.22% [F8] | F8 |\n| Charge-off (credit products) | 7.95% [F9] | 8.95% [F9] | F9 |\n\n## What moves\n\n- Deep-subprime BNPL and Credit card are the most stressed pools with charge-offs reaching 9.48% [F11] and 8.63% [F12] respectively, both remaining Within appetite [F11] [F12] against 12.0% [F11] [F12] limits with 0 / 0 [F10] pools in Breach / Watch.\n\n- December 2025 [F13] holiday peak drove Deep-subprime volume to $676.7M [F13] versus $543.1M [F13] in October 2025 [F13], a lift of +24.6% [F13].\n\n- Post-holiday delinquency in the Deep-subprime tier spiked to 12.12% [F14] in January 2026 [F14] from 10.66% [F14] in December 2025 [F14].\n\n## Data coverage\n\nAs-of month: 2026-06 [F1]; sources: MACRO_STRESS_BENCHMARK [F1], app input [F2], MACRO_STRESS_INDICATORS [F3] [F4], MACRO_STRESS_SCENARIO [F5] [F6] [F7] [F8] [F9] [F11] [F12], MACRO_STRESS_APPETITE [F10].",
+  "verdict": {
+   "status": "verified",
+   "residual_hedges": 0,
+   "claims_checked": 24,
+   "edits": []
+  },
+  "latencyMs": 7643,
+  "preset": "Mild"
+ },
+ {
+  "tier": "All tiers",
+  "fedBps": 200,
+  "unPp": 1.0,
+  "injected": false,
+  "facts": [
+   {
+    "id": "F1",
+    "label": "As-of month",
+    "value": "2026-06",
+    "source": "MACRO_STRESS_BENCHMARK"
+   },
+   {
+    "id": "F2",
+    "label": "Scenario",
+    "value": "+200 bps Fed funds, +1 pp unemployment",
+    "source": "app input"
+   },
+   {
+    "id": "F3",
+    "label": "Fed funds, baseline -> scenario",
+    "value": "4.30% -> 6.30%",
+    "source": "MACRO_STRESS_INDICATORS"
+   },
+   {
+    "id": "F4",
+    "label": "Unemployment, baseline -> scenario",
+    "value": "4.20% -> 5.20%",
+    "source": "MACRO_STRESS_INDICATORS"
+   },
+   {
+    "id": "F5",
+    "label": "Consumer sentiment, baseline -> modeled",
+    "value": "70.0 -> 63.0",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F6",
+    "label": "Monthly volume, the whole book, baseline -> scenario",
+    "value": "$5.03B -> $4.85B",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F7",
+    "label": "Approval rate (volume-weighted), the whole book",
+    "value": "89.76% -> 88.22%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F8",
+    "label": "30-day delinquency (credit products), the whole book",
+    "value": "3.08% -> 3.84%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F9",
+    "label": "Charge-off (credit products), the whole book",
+    "value": "1.79% -> 2.33%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F10",
+    "label": "Pools in Breach / Watch, the whole book",
+    "value": "0 / 2",
+    "source": "MACRO_STRESS_APPETITE"
+   },
+   {
+    "id": "F11",
+    "label": "Deep-subprime BNPL: charge-off baseline -> scenario (limit), status",
+    "value": "8.48% -> 10.48% (limit 12.0%), Watch",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F12",
+    "label": "Deep-subprime Credit card: charge-off baseline -> scenario (limit), status",
+    "value": "7.63% -> 9.63% (limit 12.0%), Watch",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F13",
+    "label": "Subprime BNPL: charge-off baseline -> scenario (limit), status",
+    "value": "4.03% -> 5.23% (limit 7.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F14",
+    "label": "Subprime Credit card: charge-off baseline -> scenario (limit), status",
+    "value": "3.37% -> 4.57% (limit 7.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F15",
+    "label": "Near-prime BNPL: charge-off baseline -> scenario (limit), status",
+    "value": "1.29% -> 1.69% (limit 3.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F16",
+    "label": "Near-prime Credit card: charge-off baseline -> scenario (limit), status",
+    "value": "1.19% -> 1.59% (limit 3.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F17",
+    "label": "Prime BNPL: charge-off baseline -> scenario (limit), status",
+    "value": "0.40% -> 0.50% (limit 1.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F18",
+    "label": "Prime Credit card: charge-off baseline -> scenario (limit), status",
+    "value": "0.30% -> 0.40% (limit 1.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F19",
+    "label": "Holiday peak, the whole book: December 2025 vs October 2025 volume",
+    "value": "$6.14B vs $4.94B (+24.3%)",
+    "source": "MACRO_STRESS_BENCHMARK"
+   },
+   {
+    "id": "F20",
+    "label": "Post-holiday delinquency, the whole book: January 2026 vs December 2025",
+    "value": "4.02% vs 3.26%",
+    "source": "MACRO_STRESS_BENCHMARK"
+   }
+  ],
+  "draft": "# Payments Risk Committee Stress Note\n\n**The stress scenario moves deep-subprime BNPL and Credit card pools to Watch status with charge-offs reaching 10.48% [F11] and 9.63% [F12], while volume contracts to $4.85B [F6].**\n\n| Metric | Baseline | Scenario | Fact |\n|--------|----------|----------|------|\n| Monthly volume (whole book) | $5.03B | $4.85B | [F6] |\n| Approval rate (volume-weighted, whole book) | 89.76% | 88.22% | [F7] |\n| 30-day delinquency (credit products, whole book) | 3.08% | 3.84% | [F8] |\n| Charge-off (credit products, whole book) | 1.79% | 2.33% | [F9] |\n\n## What moves\n\n- Deep-subprime BNPL charge-offs move from 8.48% to 10.48% [F11] (limit 12.0% [F11], Watch [F11]) and deep-subprime Credit card charge-offs move from 7.63% to 9.63% [F12] (limit 12.0% [F12], Watch [F12]), with 0 pools in Breach and 2 in Watch [F10].\n\n- December 2025 holiday peak volume reached $6.14B versus $4.94B in October 2025 [F19].\n\n- January 2026 post-holiday delinquency rose to 4.02% from 3.26% in December 2025 [F20].\n\n## Data coverage\nAs-of month: 2026-06 [F1]; sources: MACRO_STRESS_BENCHMARK [F1], MACRO_STRESS_SCENARIO [F6], MACRO_STRESS_APPETITE [F10].",
+  "verdict": {
+   "status": "verified",
+   "residual_hedges": 0,
+   "claims_checked": 16,
+   "edits": []
+  },
+  "latencyMs": 7455,
+  "preset": "Base case"
+ },
+ {
+  "tier": "Prime",
+  "fedBps": 200,
+  "unPp": 1.0,
+  "injected": false,
+  "facts": [
+   {
+    "id": "F1",
+    "label": "As-of month",
+    "value": "2026-06",
+    "source": "MACRO_STRESS_BENCHMARK"
+   },
+   {
+    "id": "F2",
+    "label": "Scenario",
+    "value": "+200 bps Fed funds, +1 pp unemployment",
+    "source": "app input"
+   },
+   {
+    "id": "F3",
+    "label": "Fed funds, baseline -> scenario",
+    "value": "4.30% -> 6.30%",
+    "source": "MACRO_STRESS_INDICATORS"
+   },
+   {
+    "id": "F4",
+    "label": "Unemployment, baseline -> scenario",
+    "value": "4.20% -> 5.20%",
+    "source": "MACRO_STRESS_INDICATORS"
+   },
+   {
+    "id": "F5",
+    "label": "Consumer sentiment, baseline -> modeled",
+    "value": "70.0 -> 63.0",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F6",
+    "label": "Monthly volume, the Prime tier, baseline -> scenario",
+    "value": "$2.05B -> $1.99B",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F7",
+    "label": "Approval rate (volume-weighted), the Prime tier",
+    "value": "96.87% -> 96.47%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F8",
+    "label": "30-day delinquency (credit products), the Prime tier",
+    "value": "0.93% -> 1.13%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F9",
+    "label": "Charge-off (credit products), the Prime tier",
+    "value": "0.31% -> 0.41%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F10",
+    "label": "Pools in Breach / Watch, the Prime tier",
+    "value": "0 / 0",
+    "source": "MACRO_STRESS_APPETITE"
+   },
+   {
+    "id": "F11",
+    "label": "Prime BNPL: charge-off baseline -> scenario (limit), status",
+    "value": "0.40% -> 0.50% (limit 1.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F12",
+    "label": "Prime Credit card: charge-off baseline -> scenario (limit), status",
+    "value": "0.30% -> 0.40% (limit 1.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F13",
+    "label": "Holiday peak, the Prime tier: December 2025 vs October 2025 volume",
+    "value": "$2.44B vs $1.99B (+22.4%)",
+    "source": "MACRO_STRESS_BENCHMARK"
+   },
+   {
+    "id": "F14",
+    "label": "Post-holiday delinquency, the Prime tier: January 2026 vs December 2025",
+    "value": "1.23% vs 1.00%",
+    "source": "MACRO_STRESS_BENCHMARK"
+   }
+  ],
+  "draft": "# Prime Tier Stress Assessment\n\n**Under a +200 bps Fed funds and +1 pp unemployment shock, Prime tier charge-offs increase by 10 basis points to 0.41%, remaining well within appetite limits across all pools.**\n\n| Metric | Baseline | Scenario | Fact |\n|--------|----------|----------|------|\n| Monthly volume | $2.05B [F6] | $1.99B [F6] | F6 |\n| Approval rate (volume-weighted) | 96.87% [F7] | 96.47% [F7] | F7 |\n| 30-day delinquency | 0.93% [F8] | 1.13% [F8] | F8 |\n| Charge-off | 0.31% [F9] | 0.41% [F9] | F9 |\n\n## What moves\n\n- Prime BNPL and Prime Credit card exhibit the highest stress, with charge-offs rising from 0.40% to 0.50% [F11] and 0.30% to 0.40% [F12] respectively, but both remain Within appetite [F11, F12] against 1.0% limits [F11, F12]; 0 / 0 [F10] pools are in Breach / Watch status.\n\n- Holiday-season volume peaked at $2.44B [F13] in December 2025 versus $1.99B [F13] in October 2025, a +22.4% [F13] increase that concentrates exposure in the fourth quarter.\n\n- Post-holiday delinquency rose to 1.23% [F14] in January 2026 from 1.00% [F14] in December 2025, reflecting typical seasonal payment strain following the holiday spending surge.\n\n## Data coverage\nAs-of month: 2026-06 [F1]; sources: MACRO_STRESS_BENCHMARK [F1, F13, F14], app input [F2], MACRO_STRESS_INDICATORS [F3, F4], MACRO_STRESS_SCENARIO [F5, F6, F7, F8, F9, F11, F12], MACRO_STRESS_APPETITE [F10].",
+  "verdict": {
+   "status": "verified",
+   "residual_hedges": 0,
+   "claims_checked": 24,
+   "edits": []
+  },
+  "latencyMs": 7933,
+  "preset": "Base case"
+ },
+ {
+  "tier": "Near-prime",
+  "fedBps": 200,
+  "unPp": 1.0,
+  "injected": false,
+  "facts": [
+   {
+    "id": "F1",
+    "label": "As-of month",
+    "value": "2026-06",
+    "source": "MACRO_STRESS_BENCHMARK"
+   },
+   {
+    "id": "F2",
+    "label": "Scenario",
+    "value": "+200 bps Fed funds, +1 pp unemployment",
+    "source": "app input"
+   },
+   {
+    "id": "F3",
+    "label": "Fed funds, baseline -> scenario",
+    "value": "4.30% -> 6.30%",
+    "source": "MACRO_STRESS_INDICATORS"
+   },
+   {
+    "id": "F4",
+    "label": "Unemployment, baseline -> scenario",
+    "value": "4.20% -> 5.20%",
+    "source": "MACRO_STRESS_INDICATORS"
+   },
+   {
+    "id": "F5",
+    "label": "Consumer sentiment, baseline -> modeled",
+    "value": "70.0 -> 63.0",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F6",
+    "label": "Monthly volume, the Near-prime tier, baseline -> scenario",
+    "value": "$1.43B -> $1.38B",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F7",
+    "label": "Approval rate (volume-weighted), the Near-prime tier",
+    "value": "90.76% -> 89.56%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F8",
+    "label": "30-day delinquency (credit products), the Near-prime tier",
+    "value": "2.67% -> 3.27%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F9",
+    "label": "Charge-off (credit products), the Near-prime tier",
+    "value": "1.22% -> 1.62%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F10",
+    "label": "Pools in Breach / Watch, the Near-prime tier",
+    "value": "0 / 0",
+    "source": "MACRO_STRESS_APPETITE"
+   },
+   {
+    "id": "F11",
+    "label": "Near-prime BNPL: charge-off baseline -> scenario (limit), status",
+    "value": "1.29% -> 1.69% (limit 3.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F12",
+    "label": "Near-prime Credit card: charge-off baseline -> scenario (limit), status",
+    "value": "1.19% -> 1.59% (limit 3.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F13",
+    "label": "Holiday peak, the Near-prime tier: December 2025 vs October 2025 volume",
+    "value": "$1.77B vs $1.43B (+24.1%)",
+    "source": "MACRO_STRESS_BENCHMARK"
+   },
+   {
+    "id": "F14",
+    "label": "Post-holiday delinquency, the Near-prime tier: January 2026 vs December 2025",
+    "value": "3.52% vs 2.58%",
+    "source": "MACRO_STRESS_BENCHMARK"
+   }
+  ],
+  "draft": "# Near-prime Stress: +200 bps Fed Funds Scenario\n\n**The Near-prime tier remains within appetite under stress, though charge-offs rise 33% and delinquency increases 60 basis points.**\n\n| Metric | Baseline | Scenario | Fact |\n|--------|----------|----------|------|\n| Monthly volume | $1.43B [F6] | $1.38B [F6] | F6 |\n| Approval rate (volume-weighted) | 90.76% [F7] | 89.56% [F7] | F7 |\n| 30-day delinquency (credit products) | 2.67% [F8] | 3.27% [F8] | F8 |\n| Charge-off (credit products) | 1.22% [F9] | 1.62% [F9] | F9 |\n\n## What moves\n\n- **Most stressed pools:** Near-prime BNPL charge-off moves from 1.29% [F11] to 1.69% [F11] (limit 3.0% [F11], Within appetite [F11]); Near-prime Credit card charge-off moves from 1.19% [F12] to 1.59% [F12] (limit 3.0% [F12], Within appetite [F12]). Pools in Breach / Watch: 0 / 0 [F10].\n\n- **Holiday-season effect:** December 2025 volume reached $1.77B [F13] versus October 2025 volume of $1.43B [F13] (+24.1% [F13]).\n\n- **Post-holiday delinquency lift:** January 2026 delinquency rose to 3.52% [F14] versus December 2025 delinquency of 2.58% [F14].\n\n## Data coverage\nAs-of month: 2026-06 [F1]; sources: MACRO_STRESS_BENCHMARK [F1], app input [F2], MACRO_STRESS_INDICATORS [F3], MACRO_STRESS_SCENARIO [F6], MACRO_STRESS_APPETITE [F10].",
+  "verdict": {
+   "status": "needs_review",
+   "residual_hedges": 0,
+   "claims_checked": 3,
+   "edits": [
+    "charge-offs rise 33% - not supported by FACTS",
+    "delinquency increases 60 basis points - not supported by FACTS"
+   ]
+  },
+  "latencyMs": 7507,
+  "preset": "Base case"
+ },
+ {
+  "tier": "Subprime",
+  "fedBps": 200,
+  "unPp": 1.0,
+  "injected": false,
+  "facts": [
+   {
+    "id": "F1",
+    "label": "As-of month",
+    "value": "2026-06",
+    "source": "MACRO_STRESS_BENCHMARK"
+   },
+   {
+    "id": "F2",
+    "label": "Scenario",
+    "value": "+200 bps Fed funds, +1 pp unemployment",
+    "source": "app input"
+   },
+   {
+    "id": "F3",
+    "label": "Fed funds, baseline -> scenario",
+    "value": "4.30% -> 6.30%",
+    "source": "MACRO_STRESS_INDICATORS"
+   },
+   {
+    "id": "F4",
+    "label": "Unemployment, baseline -> scenario",
+    "value": "4.20% -> 5.20%",
+    "source": "MACRO_STRESS_INDICATORS"
+   },
+   {
+    "id": "F5",
+    "label": "Consumer sentiment, baseline -> modeled",
+    "value": "70.0 -> 63.0",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F6",
+    "label": "Monthly volume, the Subprime tier, baseline -> scenario",
+    "value": "$994.9M -> $953.1M",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F7",
+    "label": "Approval rate (volume-weighted), the Subprime tier",
+    "value": "80.32% -> 77.52%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F8",
+    "label": "30-day delinquency (credit products), the Subprime tier",
+    "value": "5.92% -> 7.52%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F9",
+    "label": "Charge-off (credit products), the Subprime tier",
+    "value": "3.59% -> 4.79%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F10",
+    "label": "Pools in Breach / Watch, the Subprime tier",
+    "value": "0 / 0",
+    "source": "MACRO_STRESS_APPETITE"
+   },
+   {
+    "id": "F11",
+    "label": "Subprime BNPL: charge-off baseline -> scenario (limit), status",
+    "value": "4.03% -> 5.23% (limit 7.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F12",
+    "label": "Subprime Credit card: charge-off baseline -> scenario (limit), status",
+    "value": "3.37% -> 4.57% (limit 7.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F13",
+    "label": "Holiday peak, the Subprime tier: December 2025 vs October 2025 volume",
+    "value": "$1.25B vs $974.7M (+28.3%)",
+    "source": "MACRO_STRESS_BENCHMARK"
+   },
+   {
+    "id": "F14",
+    "label": "Post-holiday delinquency, the Subprime tier: January 2026 vs December 2025",
+    "value": "8.06% vs 6.40%",
+    "source": "MACRO_STRESS_BENCHMARK"
+   }
+  ],
+  "draft": "# Subprime Stress Analysis\n\n**Under the scenario, Subprime charge-offs rise 120 basis points to 4.79% [F9] while all pools remain within appetite limits.**\n\n| Metric | Baseline | Scenario | Fact |\n|--------|----------|----------|------|\n| Monthly volume | $994.9M | $953.1M | [F6] |\n| Approval rate (volume-weighted) | 80.32% | 77.52% | [F7] |\n| 30-day delinquency (credit products) | 5.92% | 7.52% | [F8] |\n| Charge-off (credit products) | 3.59% | 4.79% | [F9] |\n\n## What moves\n\n- **Subprime BNPL** and **Subprime Credit card** are the most stressed pools with charge-offs reaching 5.23% [F11] and 4.57% [F12] respectively under scenario (limits 7.0% [F11] [F12]), both Within appetite [F11] [F12]; 0 / 0 [F10] pools in Breach / Watch.\n\n- The holiday-season effect drove December 2025 volume to $1.25B versus $974.7M in October 2025 (+28.3%) [F13].\n\n- Post-holiday delinquency lifted to 8.06% in January 2026 from 6.40% in December 2025 [F14].\n\n## Data coverage\n\nAs-of month: 2026-06 [F1]; sources: MACRO_STRESS_BENCHMARK [F1] [F13] [F14], app input [F2], MACRO_STRESS_INDICATORS [F3] [F4], MACRO_STRESS_SCENARIO [F5] [F6] [F7] [F8] [F9] [F11] [F12], MACRO_STRESS_APPETITE [F10].",
+  "verdict": {
+   "status": "verified",
+   "residual_hedges": 0,
+   "claims_checked": 24,
+   "edits": []
+  },
+  "latencyMs": 7382,
+  "preset": "Base case"
+ },
+ {
+  "tier": "Deep-subprime",
+  "fedBps": 200,
+  "unPp": 1.0,
+  "injected": false,
+  "facts": [
+   {
+    "id": "F1",
+    "label": "As-of month",
+    "value": "2026-06",
+    "source": "MACRO_STRESS_BENCHMARK"
+   },
+   {
+    "id": "F2",
+    "label": "Scenario",
+    "value": "+200 bps Fed funds, +1 pp unemployment",
+    "source": "app input"
+   },
+   {
+    "id": "F3",
+    "label": "Fed funds, baseline -> scenario",
+    "value": "4.30% -> 6.30%",
+    "source": "MACRO_STRESS_INDICATORS"
+   },
+   {
+    "id": "F4",
+    "label": "Unemployment, baseline -> scenario",
+    "value": "4.20% -> 5.20%",
+    "source": "MACRO_STRESS_INDICATORS"
+   },
+   {
+    "id": "F5",
+    "label": "Consumer sentiment, baseline -> modeled",
+    "value": "70.0 -> 63.0",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F6",
+    "label": "Monthly volume, the Deep-subprime tier, baseline -> scenario",
+    "value": "$556.7M -> $529.4M",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F7",
+    "label": "Approval rate (volume-weighted), the Deep-subprime tier",
+    "value": "77.92% -> 73.52%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F8",
+    "label": "30-day delinquency (credit products), the Deep-subprime tier",
+    "value": "9.92% -> 12.52%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F9",
+    "label": "Charge-off (credit products), the Deep-subprime tier",
+    "value": "7.95% -> 9.95%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F10",
+    "label": "Pools in Breach / Watch, the Deep-subprime tier",
+    "value": "0 / 2",
+    "source": "MACRO_STRESS_APPETITE"
+   },
+   {
+    "id": "F11",
+    "label": "Deep-subprime BNPL: charge-off baseline -> scenario (limit), status",
+    "value": "8.48% -> 10.48% (limit 12.0%), Watch",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F12",
+    "label": "Deep-subprime Credit card: charge-off baseline -> scenario (limit), status",
+    "value": "7.63% -> 9.63% (limit 12.0%), Watch",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F13",
+    "label": "Holiday peak, the Deep-subprime tier: December 2025 vs October 2025 volume",
+    "value": "$676.7M vs $543.1M (+24.6%)",
+    "source": "MACRO_STRESS_BENCHMARK"
+   },
+   {
+    "id": "F14",
+    "label": "Post-holiday delinquency, the Deep-subprime tier: January 2026 vs December 2025",
+    "value": "12.12% vs 10.66%",
+    "source": "MACRO_STRESS_BENCHMARK"
+   }
+  ],
+  "draft": "# Deep-Subprime Stress Analysis\n\n**The Deep-subprime tier shows material deterioration under stress with charge-offs rising 200 basis points to 9.95% [F9], though both BNPL and Credit card pools remain within appetite limits at Watch status.**\n\n| Metric | Baseline | Scenario | Fact |\n|--------|----------|----------|------|\n| Monthly volume | $556.7M [F6] | $529.4M [F6] | F6 |\n| Approval rate (volume-weighted) | 77.92% [F7] | 73.52% [F7] | F7 |\n| 30-day delinquency (credit products) | 9.92% [F8] | 12.52% [F8] | F8 |\n| Charge-off (credit products) | 7.95% [F9] | 9.95% [F9] | F9 |\n\n## What moves\n\n- Deep-subprime BNPL stress charge-off reaches 10.48% [F11] and Deep-subprime Credit card reaches 9.63% [F12], both under the 12.0% limit [F11] [F12]; 0 pools in Breach and 2 pools on Watch [F10].\n\n- December 2025 holiday peak volume reached $676.7M [F13] versus $543.1M [F13] in October 2025, a increase of 24.6% [F13].\n\n- Post-holiday delinquency in January 2026 jumped to 12.12% [F14] from 10.66% [F14] in December 2025.\n\n## Data coverage\n\nAs-of month: 2026-06 [F1]; sources: MACRO_STRESS_BENCHMARK, app input, MACRO_STRESS_INDICATORS, MACRO_STRESS_SCENARIO, MACRO_STRESS_APPETITE [F1] [F2] [F3] [F4] [F5] [F6] [F7] [F8] [F9] [F10] [F11] [F12] [F13] [F14].",
+  "verdict": {
+   "status": "verified",
+   "residual_hedges": 0,
+   "claims_checked": 24,
+   "edits": []
+  },
+  "latencyMs": 7708,
+  "preset": "Base case"
+ },
+ {
+  "tier": "All tiers",
+  "fedBps": 300,
+  "unPp": 2.0,
+  "injected": false,
+  "facts": [
+   {
+    "id": "F1",
+    "label": "As-of month",
+    "value": "2026-06",
+    "source": "MACRO_STRESS_BENCHMARK"
+   },
+   {
+    "id": "F2",
+    "label": "Scenario",
+    "value": "+300 bps Fed funds, +2 pp unemployment",
+    "source": "app input"
+   },
+   {
+    "id": "F3",
+    "label": "Fed funds, baseline -> scenario",
+    "value": "4.30% -> 7.30%",
+    "source": "MACRO_STRESS_INDICATORS"
+   },
+   {
+    "id": "F4",
+    "label": "Unemployment, baseline -> scenario",
+    "value": "4.20% -> 6.20%",
+    "source": "MACRO_STRESS_INDICATORS"
+   },
+   {
+    "id": "F5",
+    "label": "Consumer sentiment, baseline -> modeled",
+    "value": "70.0 -> 57.5",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F6",
+    "label": "Monthly volume, the whole book, baseline -> scenario",
+    "value": "$5.03B -> $4.71B",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F7",
+    "label": "Approval rate (volume-weighted), the whole book",
+    "value": "89.76% -> 87.44%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F8",
+    "label": "30-day delinquency (credit products), the whole book",
+    "value": "3.08% -> 4.61%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F9",
+    "label": "Charge-off (credit products), the whole book",
+    "value": "1.79% -> 2.87%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F10",
+    "label": "Pools in Breach / Watch, the whole book",
+    "value": "1 / 3",
+    "source": "MACRO_STRESS_APPETITE"
+   },
+   {
+    "id": "F11",
+    "label": "Deep-subprime BNPL: charge-off baseline -> scenario (limit), status",
+    "value": "8.48% -> 12.48% (limit 12.0%), Breach",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F12",
+    "label": "Deep-subprime Credit card: charge-off baseline -> scenario (limit), status",
+    "value": "7.63% -> 11.63% (limit 12.0%), Watch",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F13",
+    "label": "Subprime BNPL: charge-off baseline -> scenario (limit), status",
+    "value": "4.03% -> 6.43% (limit 7.0%), Watch",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F14",
+    "label": "Subprime Credit card: charge-off baseline -> scenario (limit), status",
+    "value": "3.37% -> 5.77% (limit 7.0%), Watch",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F15",
+    "label": "Near-prime BNPL: charge-off baseline -> scenario (limit), status",
+    "value": "1.29% -> 2.09% (limit 3.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F16",
+    "label": "Near-prime Credit card: charge-off baseline -> scenario (limit), status",
+    "value": "1.19% -> 1.99% (limit 3.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F17",
+    "label": "Prime BNPL: charge-off baseline -> scenario (limit), status",
+    "value": "0.40% -> 0.60% (limit 1.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F18",
+    "label": "Prime Credit card: charge-off baseline -> scenario (limit), status",
+    "value": "0.30% -> 0.50% (limit 1.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F19",
+    "label": "Holiday peak, the whole book: December 2025 vs October 2025 volume",
+    "value": "$6.14B vs $4.94B (+24.3%)",
+    "source": "MACRO_STRESS_BENCHMARK"
+   },
+   {
+    "id": "F20",
+    "label": "Post-holiday delinquency, the whole book: January 2026 vs December 2025",
+    "value": "4.02% vs 3.26%",
+    "source": "MACRO_STRESS_BENCHMARK"
+   }
+  ],
+  "draft": "# Stress Note: +300 bps Fed Funds Shock\n\n**Under the scenario, 1 pool breaches appetite limits and 3 pools enter watch status.**\n\n| Metric | Baseline | Scenario | Fact |\n|--------|----------|----------|------|\n| Monthly volume (whole book) | $5.03B | $4.71B | [F6] |\n| Approval rate (volume-weighted, whole book) | 89.76% | 87.44% | [F7] |\n| 30-day delinquency (credit products, whole book) | 3.08% | 4.61% | [F8] |\n| Charge-off (credit products, whole book) | 1.79% | 2.87% | [F9] |\n\n## What moves\n\n- Deep-subprime BNPL charge-off moves from 8.48% to 12.48% [F11], exceeding the 12.0% limit [F11] to Breach status [F11]; deep-subprime Credit card charge-off moves from 7.63% to 11.63% [F12], entering Watch status [F12] against a 12.0% limit [F12].\n\n- The December 2025 holiday peak delivered $6.14B volume versus $4.94B in October 2025 [F19], a +24.3% lift [F19].\n\n- Post-holiday delinquency jumped from 3.26% in December 2025 to 4.02% in January 2026 [F20].\n\n## Data coverage\n\nAs-of month: 2026-06 [F1]; sources: MACRO_STRESS_BENCHMARK [F1], MACRO_STRESS_SCENARIO [F6], MACRO_STRESS_APPETITE [F10].",
+  "verdict": {
+   "status": "needs_review",
+   "residual_hedges": 0,
+   "claims_checked": 15,
+   "edits": [
+    "Summary statement claims '3 pools enter watch status' but F10 shows 1 breach / 3 watch total, not 3 new watch"
+   ]
+  },
+  "latencyMs": 8400,
+  "preset": "Severe"
+ },
+ {
+  "tier": "Prime",
+  "fedBps": 300,
+  "unPp": 2.0,
+  "injected": false,
+  "facts": [
+   {
+    "id": "F1",
+    "label": "As-of month",
+    "value": "2026-06",
+    "source": "MACRO_STRESS_BENCHMARK"
+   },
+   {
+    "id": "F2",
+    "label": "Scenario",
+    "value": "+300 bps Fed funds, +2 pp unemployment",
+    "source": "app input"
+   },
+   {
+    "id": "F3",
+    "label": "Fed funds, baseline -> scenario",
+    "value": "4.30% -> 7.30%",
+    "source": "MACRO_STRESS_INDICATORS"
+   },
+   {
+    "id": "F4",
+    "label": "Unemployment, baseline -> scenario",
+    "value": "4.20% -> 6.20%",
+    "source": "MACRO_STRESS_INDICATORS"
+   },
+   {
+    "id": "F5",
+    "label": "Consumer sentiment, baseline -> modeled",
+    "value": "70.0 -> 57.5",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F6",
+    "label": "Monthly volume, the Prime tier, baseline -> scenario",
+    "value": "$2.05B -> $1.95B",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F7",
+    "label": "Approval rate (volume-weighted), the Prime tier",
+    "value": "96.87% -> 96.27%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F8",
+    "label": "30-day delinquency (credit products), the Prime tier",
+    "value": "0.93% -> 1.33%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F9",
+    "label": "Charge-off (credit products), the Prime tier",
+    "value": "0.31% -> 0.51%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F10",
+    "label": "Pools in Breach / Watch, the Prime tier",
+    "value": "0 / 0",
+    "source": "MACRO_STRESS_APPETITE"
+   },
+   {
+    "id": "F11",
+    "label": "Prime BNPL: charge-off baseline -> scenario (limit), status",
+    "value": "0.40% -> 0.60% (limit 1.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F12",
+    "label": "Prime Credit card: charge-off baseline -> scenario (limit), status",
+    "value": "0.30% -> 0.50% (limit 1.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F13",
+    "label": "Holiday peak, the Prime tier: December 2025 vs October 2025 volume",
+    "value": "$2.44B vs $1.99B (+22.4%)",
+    "source": "MACRO_STRESS_BENCHMARK"
+   },
+   {
+    "id": "F14",
+    "label": "Post-holiday delinquency, the Prime tier: January 2026 vs December 2025",
+    "value": "1.23% vs 1.00%",
+    "source": "MACRO_STRESS_BENCHMARK"
+   }
+  ],
+  "draft": "# Prime Tier Stress Analysis\n\n**Under a 300 bps Fed funds shock and 2 pp unemployment rise, Prime charge-offs increase 65% to 0.51% but all pools remain within appetite.**\n\n| Metric | Baseline | Scenario | Fact |\n|--------|----------|----------|------|\n| Monthly volume | $2.05B [F6] | $1.95B [F6] | F6 |\n| Approval rate (volume-weighted) | 96.87% [F7] | 96.27% [F7] | F7 |\n| 30-day delinquency | 0.93% [F8] | 1.33% [F8] | F8 |\n| Charge-off | 0.31% [F9] | 0.51% [F9] | F9 |\n\n## What moves\n\n- Prime BNPL charge-offs move from 0.40% [F11] to 0.60% [F11] (limit 1.0% [F11], Within appetite [F11]) and Prime Credit card charge-offs move from 0.30% [F12] to 0.50% [F12] (limit 1.0% [F12], Within appetite [F12]), with 0 / 0 [F10] pools in Breach / Watch.\n\n- December 2025 [F13] volume reached $2.44B [F13] versus $1.99B [F13] in October 2025 [F13], a +22.4% [F13] holiday peak.\n\n- January 2026 [F14] delinquency rose to 1.23% [F14] from 1.00% [F14] in December 2025 [F14] post-holiday.\n\n## Data coverage\nAs-of month: 2026-06 [F1]; sources: MACRO_STRESS_BENCHMARK [F1], app input [F2], MACRO_STRESS_INDICATORS [F3], MACRO_STRESS_SCENARIO [F5], MACRO_STRESS_APPETITE [F10].",
+  "verdict": {
+   "status": "needs_review",
+   "residual_hedges": 0,
+   "claims_checked": 20,
+   "edits": [
+    "65% increase calculation for charge-offs (0.31% to 0.51% is 64.5%, not 65%)"
+   ]
+  },
+  "latencyMs": 7527,
+  "preset": "Severe"
+ },
+ {
+  "tier": "Near-prime",
+  "fedBps": 300,
+  "unPp": 2.0,
+  "injected": false,
+  "facts": [
+   {
+    "id": "F1",
+    "label": "As-of month",
+    "value": "2026-06",
+    "source": "MACRO_STRESS_BENCHMARK"
+   },
+   {
+    "id": "F2",
+    "label": "Scenario",
+    "value": "+300 bps Fed funds, +2 pp unemployment",
+    "source": "app input"
+   },
+   {
+    "id": "F3",
+    "label": "Fed funds, baseline -> scenario",
+    "value": "4.30% -> 7.30%",
+    "source": "MACRO_STRESS_INDICATORS"
+   },
+   {
+    "id": "F4",
+    "label": "Unemployment, baseline -> scenario",
+    "value": "4.20% -> 6.20%",
+    "source": "MACRO_STRESS_INDICATORS"
+   },
+   {
+    "id": "F5",
+    "label": "Consumer sentiment, baseline -> modeled",
+    "value": "70.0 -> 57.5",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F6",
+    "label": "Monthly volume, the Near-prime tier, baseline -> scenario",
+    "value": "$1.43B -> $1.34B",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F7",
+    "label": "Approval rate (volume-weighted), the Near-prime tier",
+    "value": "90.76% -> 88.96%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F8",
+    "label": "30-day delinquency (credit products), the Near-prime tier",
+    "value": "2.67% -> 3.87%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F9",
+    "label": "Charge-off (credit products), the Near-prime tier",
+    "value": "1.22% -> 2.02%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F10",
+    "label": "Pools in Breach / Watch, the Near-prime tier",
+    "value": "0 / 0",
+    "source": "MACRO_STRESS_APPETITE"
+   },
+   {
+    "id": "F11",
+    "label": "Near-prime BNPL: charge-off baseline -> scenario (limit), status",
+    "value": "1.29% -> 2.09% (limit 3.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F12",
+    "label": "Near-prime Credit card: charge-off baseline -> scenario (limit), status",
+    "value": "1.19% -> 1.99% (limit 3.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F13",
+    "label": "Holiday peak, the Near-prime tier: December 2025 vs October 2025 volume",
+    "value": "$1.77B vs $1.43B (+24.1%)",
+    "source": "MACRO_STRESS_BENCHMARK"
+   },
+   {
+    "id": "F14",
+    "label": "Post-holiday delinquency, the Near-prime tier: January 2026 vs December 2025",
+    "value": "3.52% vs 2.58%",
+    "source": "MACRO_STRESS_BENCHMARK"
+   }
+  ],
+  "draft": "# Near-Prime Stress Analysis\n\n**Under the stress scenario, Near-prime charge-offs increase by 80 basis points to 2.02% while volume declines 6% to $1.34B, though both BNPL and Credit card portfolios remain within appetite limits.**\n\n| Metric | Baseline | Scenario | Fact |\n|--------|----------|----------|------|\n| Monthly volume | $1.43B | $1.34B | [F6] |\n| Approval rate (volume-weighted) | 90.76% | 88.96% | [F7] |\n| 30-day delinquency (credit products) | 2.67% | 3.87% | [F8] |\n| Charge-off (credit products) | 1.22% | 2.02% | [F9] |\n\n## What moves\n\n- Near-prime BNPL and Near-prime Credit card are the most stressed pools with charge-offs moving from 1.29% to 2.09% (limit 3.0%) [F11] and 1.19% to 1.99% (limit 3.0%) [F12] respectively, with 0 pools in Breach and 0 in Watch status [F10].\n\n- The Near-prime tier experiences pronounced holiday seasonality with December 2025 volume of $1.77B versus October 2025 volume of $1.43B (+24.1%) [F13].\n\n- Post-holiday delinquency in the Near-prime tier increases to 3.52% in January 2026 from 2.58% in December 2025 [F14].\n\n## Data coverage\nAs-of month: 2026-06 [F1]; sources: MACRO_STRESS_BENCHMARK, app input, MACRO_STRESS_INDICATORS, MACRO_STRESS_SCENARIO, MACRO_STRESS_APPETITE.",
+  "verdict": {
+   "status": "verified",
+   "residual_hedges": 0,
+   "claims_checked": 20,
+   "edits": []
+  },
+  "latencyMs": 7434,
+  "preset": "Severe"
+ },
+ {
+  "tier": "Subprime",
+  "fedBps": 300,
+  "unPp": 2.0,
+  "injected": false,
+  "facts": [
+   {
+    "id": "F1",
+    "label": "As-of month",
+    "value": "2026-06",
+    "source": "MACRO_STRESS_BENCHMARK"
+   },
+   {
+    "id": "F2",
+    "label": "Scenario",
+    "value": "+300 bps Fed funds, +2 pp unemployment",
+    "source": "app input"
+   },
+   {
+    "id": "F3",
+    "label": "Fed funds, baseline -> scenario",
+    "value": "4.30% -> 7.30%",
+    "source": "MACRO_STRESS_INDICATORS"
+   },
+   {
+    "id": "F4",
+    "label": "Unemployment, baseline -> scenario",
+    "value": "4.20% -> 6.20%",
+    "source": "MACRO_STRESS_INDICATORS"
+   },
+   {
+    "id": "F5",
+    "label": "Consumer sentiment, baseline -> modeled",
+    "value": "70.0 -> 57.5",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F6",
+    "label": "Monthly volume, the Subprime tier, baseline -> scenario",
+    "value": "$994.9M -> $920.3M",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F7",
+    "label": "Approval rate (volume-weighted), the Subprime tier",
+    "value": "80.32% -> 76.12%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F8",
+    "label": "30-day delinquency (credit products), the Subprime tier",
+    "value": "5.92% -> 9.12%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F9",
+    "label": "Charge-off (credit products), the Subprime tier",
+    "value": "3.59% -> 5.99%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F10",
+    "label": "Pools in Breach / Watch, the Subprime tier",
+    "value": "0 / 2",
+    "source": "MACRO_STRESS_APPETITE"
+   },
+   {
+    "id": "F11",
+    "label": "Subprime BNPL: charge-off baseline -> scenario (limit), status",
+    "value": "4.03% -> 6.43% (limit 7.0%), Watch",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F12",
+    "label": "Subprime Credit card: charge-off baseline -> scenario (limit), status",
+    "value": "3.37% -> 5.77% (limit 7.0%), Watch",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F13",
+    "label": "Holiday peak, the Subprime tier: December 2025 vs October 2025 volume",
+    "value": "$1.25B vs $974.7M (+28.3%)",
+    "source": "MACRO_STRESS_BENCHMARK"
+   },
+   {
+    "id": "F14",
+    "label": "Post-holiday delinquency, the Subprime tier: January 2026 vs December 2025",
+    "value": "8.06% vs 6.40%",
+    "source": "MACRO_STRESS_BENCHMARK"
+   }
+  ],
+  "draft": "# Subprime Tier Stress Analysis\n\n**Under the scenario, Subprime charge-offs reach 5.99% [F9] with two pools on Watch and none in Breach [F10].**\n\n| Metric | Baseline | Scenario | Fact |\n|--------|----------|----------|------|\n| Monthly volume | $994.9M | $920.3M | [F6] |\n| Approval rate (volume-weighted) | 80.32% | 76.12% | [F7] |\n| 30-day delinquency (credit products) | 5.92% | 9.12% | [F8] |\n| Charge-off (credit products) | 3.59% | 5.99% | [F9] |\n\n## What moves\n\n- Subprime BNPL charge-off 4.03% -> 6.43% (limit 7.0%), Watch [F11] and Subprime Credit card charge-off 3.37% -> 5.77% (limit 7.0%), Watch [F12] are the most stressed pools with 0 pools in Breach and 2 pools on Watch [F10].\n\n- December 2025 volume $1.25B vs October 2025 volume $974.7M (+28.3%) [F13] shows the holiday-season effect.\n\n- Post-holiday delinquency January 2026 8.06% vs December 2025 6.40% [F14] shows the post-holiday delinquency lift.\n\n## Data coverage\n\nAs-of month 2026-06 [F1]; sources MACRO_STRESS_BENCHMARK, app input, MACRO_STRESS_INDICATORS, MACRO_STRESS_SCENARIO, MACRO_STRESS_APPETITE [F1][F2][F3][F4][F5][F6][F7][F8][F9][F10][F11][F12][F13][F14].",
+  "verdict": {
+   "status": "verified",
+   "residual_hedges": 0,
+   "claims_checked": 20,
+   "edits": []
+  },
+  "latencyMs": 6682,
+  "preset": "Severe"
+ },
+ {
+  "tier": "Deep-subprime",
+  "fedBps": 300,
+  "unPp": 2.0,
+  "injected": false,
+  "facts": [
+   {
+    "id": "F1",
+    "label": "As-of month",
+    "value": "2026-06",
+    "source": "MACRO_STRESS_BENCHMARK"
+   },
+   {
+    "id": "F2",
+    "label": "Scenario",
+    "value": "+300 bps Fed funds, +2 pp unemployment",
+    "source": "app input"
+   },
+   {
+    "id": "F3",
+    "label": "Fed funds, baseline -> scenario",
+    "value": "4.30% -> 7.30%",
+    "source": "MACRO_STRESS_INDICATORS"
+   },
+   {
+    "id": "F4",
+    "label": "Unemployment, baseline -> scenario",
+    "value": "4.20% -> 6.20%",
+    "source": "MACRO_STRESS_INDICATORS"
+   },
+   {
+    "id": "F5",
+    "label": "Consumer sentiment, baseline -> modeled",
+    "value": "70.0 -> 57.5",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F6",
+    "label": "Monthly volume, the Deep-subprime tier, baseline -> scenario",
+    "value": "$556.7M -> $508.0M",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F7",
+    "label": "Approval rate (volume-weighted), the Deep-subprime tier",
+    "value": "77.92% -> 71.32%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F8",
+    "label": "30-day delinquency (credit products), the Deep-subprime tier",
+    "value": "9.92% -> 15.12%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F9",
+    "label": "Charge-off (credit products), the Deep-subprime tier",
+    "value": "7.95% -> 11.95%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F10",
+    "label": "Pools in Breach / Watch, the Deep-subprime tier",
+    "value": "1 / 1",
+    "source": "MACRO_STRESS_APPETITE"
+   },
+   {
+    "id": "F11",
+    "label": "Deep-subprime BNPL: charge-off baseline -> scenario (limit), status",
+    "value": "8.48% -> 12.48% (limit 12.0%), Breach",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F12",
+    "label": "Deep-subprime Credit card: charge-off baseline -> scenario (limit), status",
+    "value": "7.63% -> 11.63% (limit 12.0%), Watch",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F13",
+    "label": "Holiday peak, the Deep-subprime tier: December 2025 vs October 2025 volume",
+    "value": "$676.7M vs $543.1M (+24.6%)",
+    "source": "MACRO_STRESS_BENCHMARK"
+   },
+   {
+    "id": "F14",
+    "label": "Post-holiday delinquency, the Deep-subprime tier: January 2026 vs December 2025",
+    "value": "12.12% vs 10.66%",
+    "source": "MACRO_STRESS_BENCHMARK"
+   }
+  ],
+  "draft": "# Deep-Subprime Stress Assessment\n\n**Under the modeled stress scenario, the Deep-subprime tier experiences charge-offs rising to 11.95% [F9], pushing BNPL into Breach and Credit card into Watch status.**\n\n| Metric | Baseline | Scenario | Fact |\n|--------|----------|----------|------|\n| Monthly volume | $556.7M | $508.0M | [F6] |\n| Approval rate (volume-weighted) | 77.92% | 71.32% | [F7] |\n| 30-day delinquency (credit products) | 9.92% | 15.12% | [F8] |\n| Charge-off (credit products) | 7.95% | 11.95% | [F9] |\n\n## What moves\n\n- Deep-subprime BNPL charge-offs move from 8.48% to 12.48% [F11], exceeding the 12.0% limit and resulting in Breach status [F11]; Deep-subprime Credit card charge-offs move from 7.63% to 11.63% [F12], reaching Watch status against the 12.0% limit [F12].\n\n- December 2025 volume reached $676.7M versus $543.1M in October 2025, a +24.6% increase [F13] during the holiday peak for the Deep-subprime tier.\n\n- January 2026 delinquency rose to 12.12% from 10.66% in December 2025 [F14] in the post-holiday period for the Deep-subprime tier.\n\n## Data coverage\n\nAs-of month: 2026-06 [F1]; sources: MACRO_STRESS_BENCHMARK [F1], app input [F2], MACRO_STRESS_INDICATORS [F3] [F4], MACRO_STRESS_SCENARIO [F5] [F6] [F7] [F8] [F9] [F11] [F12], MACRO_STRESS_APPETITE [F10].",
+  "verdict": {
+   "status": "verified",
+   "residual_hedges": 0,
+   "claims_checked": 18,
+   "edits": []
+  },
+  "latencyMs": 7553,
+  "preset": "Severe"
+ },
+ {
+  "tier": "All tiers",
+  "fedBps": 0,
+  "unPp": 3.0,
+  "injected": false,
+  "facts": [
+   {
+    "id": "F1",
+    "label": "As-of month",
+    "value": "2026-06",
+    "source": "MACRO_STRESS_BENCHMARK"
+   },
+   {
+    "id": "F2",
+    "label": "Scenario",
+    "value": "+0 bps Fed funds, +3 pp unemployment",
+    "source": "app input"
+   },
+   {
+    "id": "F3",
+    "label": "Fed funds, baseline -> scenario",
+    "value": "4.30% -> 4.30%",
+    "source": "MACRO_STRESS_INDICATORS"
+   },
+   {
+    "id": "F4",
+    "label": "Unemployment, baseline -> scenario",
+    "value": "4.20% -> 7.20%",
+    "source": "MACRO_STRESS_INDICATORS"
+   },
+   {
+    "id": "F5",
+    "label": "Consumer sentiment, baseline -> modeled",
+    "value": "70.0 -> 58.0",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F6",
+    "label": "Monthly volume, the whole book, baseline -> scenario",
+    "value": "$5.03B -> $4.72B",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F7",
+    "label": "Approval rate (volume-weighted), the whole book",
+    "value": "89.76% -> 89.76%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F8",
+    "label": "30-day delinquency (credit products), the whole book",
+    "value": "3.08% -> 5.37%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F9",
+    "label": "Charge-off (credit products), the whole book",
+    "value": "1.79% -> 3.41%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F10",
+    "label": "Pools in Breach / Watch, the whole book",
+    "value": "3 / 2",
+    "source": "MACRO_STRESS_APPETITE"
+   },
+   {
+    "id": "F11",
+    "label": "Deep-subprime BNPL: charge-off baseline -> scenario (limit), status",
+    "value": "8.48% -> 14.48% (limit 12.0%), Breach",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F12",
+    "label": "Deep-subprime Credit card: charge-off baseline -> scenario (limit), status",
+    "value": "7.63% -> 13.63% (limit 12.0%), Breach",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F13",
+    "label": "Subprime BNPL: charge-off baseline -> scenario (limit), status",
+    "value": "4.03% -> 7.63% (limit 7.0%), Breach",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F14",
+    "label": "Subprime Credit card: charge-off baseline -> scenario (limit), status",
+    "value": "3.37% -> 6.97% (limit 7.0%), Watch",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F15",
+    "label": "Near-prime BNPL: charge-off baseline -> scenario (limit), status",
+    "value": "1.29% -> 2.49% (limit 3.0%), Watch",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F16",
+    "label": "Near-prime Credit card: charge-off baseline -> scenario (limit), status",
+    "value": "1.19% -> 2.39% (limit 3.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F17",
+    "label": "Prime BNPL: charge-off baseline -> scenario (limit), status",
+    "value": "0.40% -> 0.70% (limit 1.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F18",
+    "label": "Prime Credit card: charge-off baseline -> scenario (limit), status",
+    "value": "0.30% -> 0.60% (limit 1.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F19",
+    "label": "Holiday peak, the whole book: December 2025 vs October 2025 volume",
+    "value": "$6.14B vs $4.94B (+24.3%)",
+    "source": "MACRO_STRESS_BENCHMARK"
+   },
+   {
+    "id": "F20",
+    "label": "Post-holiday delinquency, the whole book: January 2026 vs December 2025",
+    "value": "4.02% vs 3.26%",
+    "source": "MACRO_STRESS_BENCHMARK"
+   }
+  ],
+  "draft": "# Stress Scenario: Unemployment Shock Impact\n\n**Under a +3 pp unemployment scenario [F2], the whole book charge-off rate increases from 1.79% [F9] to 3.41% [F9], with 3 [F10] pools in Breach status.**\n\n| Metric | Baseline | Scenario | Fact |\n|--------|----------|----------|------|\n| Monthly volume (whole book) | $5.03B | $4.72B | [F6] |\n| Approval rate (volume-weighted, whole book) | 89.76% | 89.76% | [F7] |\n| 30-day delinquency (credit products, whole book) | 3.08% | 5.37% | [F8] |\n| Charge-off (credit products, whole book) | 1.79% | 3.41% | [F9] |\n\n## What moves\n\n- **Deep-subprime pools breach appetite limits:** Deep-subprime BNPL charge-offs increase from 8.48% to 14.48% against a 12.0% limit, Breach [F11]; deep-subprime Credit card charge-offs increase from 7.63% to 13.63% against a 12.0% limit, Breach [F12]; subprime BNPL charge-offs increase from 4.03% to 7.63% against a 7.0% limit, Breach [F13].\n\n- **Holiday season drives volume concentration:** December 2025 volume reached $6.14B versus $4.94B in October 2025, an increase of 24.3% [F19].\n\n- **Post-holiday delinquency elevation observed:** January 2026 delinquency increased to 4.02% from 3.26% in December 2025 [F20].\n\n## Data coverage\nAs-of month: 2026-06 [F1]; sources: MACRO_STRESS_BENCHMARK, app input, MACRO_STRESS_INDICATORS, MACRO_STRESS_SCENARIO, MACRO_STRESS_APPETITE [F1].",
+  "verdict": {
+   "status": "verified",
+   "residual_hedges": 0,
+   "claims_checked": 22,
+   "edits": []
+  },
+  "latencyMs": 7538,
+  "preset": "2008-style"
+ },
+ {
+  "tier": "Prime",
+  "fedBps": 0,
+  "unPp": 3.0,
+  "injected": false,
+  "facts": [
+   {
+    "id": "F1",
+    "label": "As-of month",
+    "value": "2026-06",
+    "source": "MACRO_STRESS_BENCHMARK"
+   },
+   {
+    "id": "F2",
+    "label": "Scenario",
+    "value": "+0 bps Fed funds, +3 pp unemployment",
+    "source": "app input"
+   },
+   {
+    "id": "F3",
+    "label": "Fed funds, baseline -> scenario",
+    "value": "4.30% -> 4.30%",
+    "source": "MACRO_STRESS_INDICATORS"
+   },
+   {
+    "id": "F4",
+    "label": "Unemployment, baseline -> scenario",
+    "value": "4.20% -> 7.20%",
+    "source": "MACRO_STRESS_INDICATORS"
+   },
+   {
+    "id": "F5",
+    "label": "Consumer sentiment, baseline -> modeled",
+    "value": "70.0 -> 58.0",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F6",
+    "label": "Monthly volume, the Prime tier, baseline -> scenario",
+    "value": "$2.05B -> $1.95B",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F7",
+    "label": "Approval rate (volume-weighted), the Prime tier",
+    "value": "96.87% -> 96.87%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F8",
+    "label": "30-day delinquency (credit products), the Prime tier",
+    "value": "0.93% -> 1.53%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F9",
+    "label": "Charge-off (credit products), the Prime tier",
+    "value": "0.31% -> 0.61%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F10",
+    "label": "Pools in Breach / Watch, the Prime tier",
+    "value": "0 / 0",
+    "source": "MACRO_STRESS_APPETITE"
+   },
+   {
+    "id": "F11",
+    "label": "Prime BNPL: charge-off baseline -> scenario (limit), status",
+    "value": "0.40% -> 0.70% (limit 1.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F12",
+    "label": "Prime Credit card: charge-off baseline -> scenario (limit), status",
+    "value": "0.30% -> 0.60% (limit 1.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F13",
+    "label": "Holiday peak, the Prime tier: December 2025 vs October 2025 volume",
+    "value": "$2.44B vs $1.99B (+22.4%)",
+    "source": "MACRO_STRESS_BENCHMARK"
+   },
+   {
+    "id": "F14",
+    "label": "Post-holiday delinquency, the Prime tier: January 2026 vs December 2025",
+    "value": "1.23% vs 1.00%",
+    "source": "MACRO_STRESS_BENCHMARK"
+   }
+  ],
+  "draft": "# Prime Tier Stress Assessment\n\n**Under a +3 pp unemployment shock with flat Fed funds, Prime tier monthly volume contracts to $1.95B [F6] while charge-offs double to 0.61% [F9], yet all pools remain within appetite.**\n\n| Metric | Baseline | Scenario | Fact |\n|--------|----------|----------|------|\n| Monthly volume | $2.05B | $1.95B | [F6] |\n| Approval rate | 96.87% | 96.87% | [F7] |\n| 30-day delinquency | 0.93% | 1.53% | [F8] |\n| Charge-off | 0.31% | 0.61% | [F9] |\n\n## What moves\n\n- **Prime BNPL** (0.40% \u2192 0.70%, limit 1.0%) [F11] and **Prime Credit card** (0.30% \u2192 0.60%, limit 1.0%) [F12] both stressed but Within appetite, with 0 / 0 [F10] pools in Breach / Watch.\n\n- Holiday peak drove December 2025 volume to $2.44B vs $1.99B in October 2025 (+22.4%) [F13].\n\n- Post-holiday delinquency lifted to 1.23% in January 2026 from 1.00% in December 2025 [F14].\n\n## Data coverage\n\nAs-of month: 2026-06 [F1]; sources: MACRO_STRESS_BENCHMARK, app input, MACRO_STRESS_INDICATORS, MACRO_STRESS_SCENARIO, MACRO_STRESS_APPETITE.",
+  "verdict": {
+   "status": "verified",
+   "residual_hedges": 0,
+   "claims_checked": 20,
+   "edits": []
+  },
+  "latencyMs": 6724,
+  "preset": "2008-style"
+ },
+ {
+  "tier": "Near-prime",
+  "fedBps": 0,
+  "unPp": 3.0,
+  "injected": false,
+  "facts": [
+   {
+    "id": "F1",
+    "label": "As-of month",
+    "value": "2026-06",
+    "source": "MACRO_STRESS_BENCHMARK"
+   },
+   {
+    "id": "F2",
+    "label": "Scenario",
+    "value": "+0 bps Fed funds, +3 pp unemployment",
+    "source": "app input"
+   },
+   {
+    "id": "F3",
+    "label": "Fed funds, baseline -> scenario",
+    "value": "4.30% -> 4.30%",
+    "source": "MACRO_STRESS_INDICATORS"
+   },
+   {
+    "id": "F4",
+    "label": "Unemployment, baseline -> scenario",
+    "value": "4.20% -> 7.20%",
+    "source": "MACRO_STRESS_INDICATORS"
+   },
+   {
+    "id": "F5",
+    "label": "Consumer sentiment, baseline -> modeled",
+    "value": "70.0 -> 58.0",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F6",
+    "label": "Monthly volume, the Near-prime tier, baseline -> scenario",
+    "value": "$1.43B -> $1.34B",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F7",
+    "label": "Approval rate (volume-weighted), the Near-prime tier",
+    "value": "90.76% -> 90.76%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F8",
+    "label": "30-day delinquency (credit products), the Near-prime tier",
+    "value": "2.67% -> 4.47%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F9",
+    "label": "Charge-off (credit products), the Near-prime tier",
+    "value": "1.22% -> 2.42%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F10",
+    "label": "Pools in Breach / Watch, the Near-prime tier",
+    "value": "0 / 1",
+    "source": "MACRO_STRESS_APPETITE"
+   },
+   {
+    "id": "F11",
+    "label": "Near-prime BNPL: charge-off baseline -> scenario (limit), status",
+    "value": "1.29% -> 2.49% (limit 3.0%), Watch",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F12",
+    "label": "Near-prime Credit card: charge-off baseline -> scenario (limit), status",
+    "value": "1.19% -> 2.39% (limit 3.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F13",
+    "label": "Holiday peak, the Near-prime tier: December 2025 vs October 2025 volume",
+    "value": "$1.77B vs $1.43B (+24.1%)",
+    "source": "MACRO_STRESS_BENCHMARK"
+   },
+   {
+    "id": "F14",
+    "label": "Post-holiday delinquency, the Near-prime tier: January 2026 vs December 2025",
+    "value": "3.52% vs 2.58%",
+    "source": "MACRO_STRESS_BENCHMARK"
+   }
+  ],
+  "draft": "# Near-prime Stress Assessment\n\n**The Near-prime tier experiences material deterioration under unemployment stress, with charge-offs doubling to 2.42% [F9] and BNPL nearing appetite limits.**\n\n| Metric | Baseline | Scenario | Fact |\n|--------|----------|----------|------|\n| Monthly volume | $1.43B [F6] | $1.34B [F6] | F6 |\n| Approval rate | 90.76% [F7] | 90.76% [F7] | F7 |\n| 30-day delinquency | 2.67% [F8] | 4.47% [F8] | F8 |\n| Charge-off | 1.22% [F9] | 2.42% [F9] | F9 |\n\n## What moves\n\n- Near-prime BNPL charge-offs reach 2.49% [F11] under scenario (limit 3.0% [F11]), placing the pool in Watch status [F11]; Near-prime Credit card charge-offs reach 2.39% [F12] (limit 3.0% [F12]) and remain Within appetite [F12]\n\n- December 2025 volume peaked at $1.77B [F13] versus October 2025 at $1.43B [F13], reflecting +24.1% [F13] holiday-season lift\n\n- January 2026 delinquency jumped to 3.52% [F14] from December 2025 at 2.58% [F14] post-holiday\n\n## Data coverage\n\nAs-of month: 2026-06 [F1]; sources: MACRO_STRESS_BENCHMARK [F1], app input [F2], MACRO_STRESS_INDICATORS [F3], MACRO_STRESS_SCENARIO [F5], MACRO_STRESS_APPETITE [F10]",
+  "verdict": {
+   "status": "verified",
+   "residual_hedges": 0,
+   "claims_checked": 18,
+   "edits": []
+  },
+  "latencyMs": 7229,
+  "preset": "2008-style"
+ },
+ {
+  "tier": "Subprime",
+  "fedBps": 0,
+  "unPp": 3.0,
+  "injected": false,
+  "facts": [
+   {
+    "id": "F1",
+    "label": "As-of month",
+    "value": "2026-06",
+    "source": "MACRO_STRESS_BENCHMARK"
+   },
+   {
+    "id": "F2",
+    "label": "Scenario",
+    "value": "+0 bps Fed funds, +3 pp unemployment",
+    "source": "app input"
+   },
+   {
+    "id": "F3",
+    "label": "Fed funds, baseline -> scenario",
+    "value": "4.30% -> 4.30%",
+    "source": "MACRO_STRESS_INDICATORS"
+   },
+   {
+    "id": "F4",
+    "label": "Unemployment, baseline -> scenario",
+    "value": "4.20% -> 7.20%",
+    "source": "MACRO_STRESS_INDICATORS"
+   },
+   {
+    "id": "F5",
+    "label": "Consumer sentiment, baseline -> modeled",
+    "value": "70.0 -> 58.0",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F6",
+    "label": "Monthly volume, the Subprime tier, baseline -> scenario",
+    "value": "$994.9M -> $923.3M",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F7",
+    "label": "Approval rate (volume-weighted), the Subprime tier",
+    "value": "80.32% -> 80.32%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F8",
+    "label": "30-day delinquency (credit products), the Subprime tier",
+    "value": "5.92% -> 10.72%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F9",
+    "label": "Charge-off (credit products), the Subprime tier",
+    "value": "3.59% -> 7.19%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F10",
+    "label": "Pools in Breach / Watch, the Subprime tier",
+    "value": "1 / 1",
+    "source": "MACRO_STRESS_APPETITE"
+   },
+   {
+    "id": "F11",
+    "label": "Subprime BNPL: charge-off baseline -> scenario (limit), status",
+    "value": "4.03% -> 7.63% (limit 7.0%), Breach",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F12",
+    "label": "Subprime Credit card: charge-off baseline -> scenario (limit), status",
+    "value": "3.37% -> 6.97% (limit 7.0%), Watch",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F13",
+    "label": "Holiday peak, the Subprime tier: December 2025 vs October 2025 volume",
+    "value": "$1.25B vs $974.7M (+28.3%)",
+    "source": "MACRO_STRESS_BENCHMARK"
+   },
+   {
+    "id": "F14",
+    "label": "Post-holiday delinquency, the Subprime tier: January 2026 vs December 2025",
+    "value": "8.06% vs 6.40%",
+    "source": "MACRO_STRESS_BENCHMARK"
+   }
+  ],
+  "draft": "# Subprime Stress Analysis\n\n**Under a +3 pp unemployment shock, Subprime charge-offs double to 7.19% [F9], pushing BNPL into breach and credit card onto watch.**\n\n| Metric | Baseline | Scenario | Fact |\n|--------|----------|----------|------|\n| Monthly volume | $994.9M | $923.3M | [F6] |\n| Approval rate (volume-weighted) | 80.32% | 80.32% | [F7] |\n| 30-day delinquency (credit products) | 5.92% | 10.72% | [F8] |\n| Charge-off (credit products) | 3.59% | 7.19% | [F9] |\n\n## What moves\n\n- **Subprime BNPL** charge-offs rise from 4.03% to 7.63% (limit 7.0%), moving into Breach status [F11]; **Subprime Credit card** charge-offs rise from 3.37% to 6.97% (limit 7.0%), moving onto Watch status [F12].\n\n- December 2025 volume reached $1.25B versus $974.7M in October 2025 (+28.3%) [F13], demonstrating seasonal concentration in the Subprime tier.\n\n- January 2026 delinquency jumped to 8.06% from 6.40% in December 2025 [F14], reflecting post-holiday payment stress in the Subprime tier.\n\n## Data coverage\n\nAs-of month: 2026-06 [F1]; sources: MACRO_STRESS_BENCHMARK, app input, MACRO_STRESS_INDICATORS, MACRO_STRESS_SCENARIO, MACRO_STRESS_APPETITE [F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13, F14].",
+  "verdict": {
+   "status": "verified",
+   "residual_hedges": 0,
+   "claims_checked": 20,
+   "edits": []
+  },
+  "latencyMs": 7337,
+  "preset": "2008-style"
+ },
+ {
+  "tier": "Deep-subprime",
+  "fedBps": 0,
+  "unPp": 3.0,
+  "injected": false,
+  "facts": [
+   {
+    "id": "F1",
+    "label": "As-of month",
+    "value": "2026-06",
+    "source": "MACRO_STRESS_BENCHMARK"
+   },
+   {
+    "id": "F2",
+    "label": "Scenario",
+    "value": "+0 bps Fed funds, +3 pp unemployment",
+    "source": "app input"
+   },
+   {
+    "id": "F3",
+    "label": "Fed funds, baseline -> scenario",
+    "value": "4.30% -> 4.30%",
+    "source": "MACRO_STRESS_INDICATORS"
+   },
+   {
+    "id": "F4",
+    "label": "Unemployment, baseline -> scenario",
+    "value": "4.20% -> 7.20%",
+    "source": "MACRO_STRESS_INDICATORS"
+   },
+   {
+    "id": "F5",
+    "label": "Consumer sentiment, baseline -> modeled",
+    "value": "70.0 -> 58.0",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F6",
+    "label": "Monthly volume, the Deep-subprime tier, baseline -> scenario",
+    "value": "$556.7M -> $509.9M",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F7",
+    "label": "Approval rate (volume-weighted), the Deep-subprime tier",
+    "value": "77.92% -> 77.92%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F8",
+    "label": "30-day delinquency (credit products), the Deep-subprime tier",
+    "value": "9.92% -> 17.72%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F9",
+    "label": "Charge-off (credit products), the Deep-subprime tier",
+    "value": "7.95% -> 13.95%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F10",
+    "label": "Pools in Breach / Watch, the Deep-subprime tier",
+    "value": "2 / 0",
+    "source": "MACRO_STRESS_APPETITE"
+   },
+   {
+    "id": "F11",
+    "label": "Deep-subprime BNPL: charge-off baseline -> scenario (limit), status",
+    "value": "8.48% -> 14.48% (limit 12.0%), Breach",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F12",
+    "label": "Deep-subprime Credit card: charge-off baseline -> scenario (limit), status",
+    "value": "7.63% -> 13.63% (limit 12.0%), Breach",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F13",
+    "label": "Holiday peak, the Deep-subprime tier: December 2025 vs October 2025 volume",
+    "value": "$676.7M vs $543.1M (+24.6%)",
+    "source": "MACRO_STRESS_BENCHMARK"
+   },
+   {
+    "id": "F14",
+    "label": "Post-holiday delinquency, the Deep-subprime tier: January 2026 vs December 2025",
+    "value": "12.12% vs 10.66%",
+    "source": "MACRO_STRESS_BENCHMARK"
+   }
+  ],
+  "draft": "# Deep-Subprime Stress Note\n\n**Under unemployment rising to 7.20% [F4], the Deep-subprime tier shows charge-offs reaching 13.95% [F9] with both BNPL and Credit card pools breaching appetite limits.**\n\n| Metric | Baseline | Scenario | Fact |\n|--------|----------|----------|------|\n| Monthly volume | $556.7M | $509.9M | [F6] |\n| Approval rate (volume-weighted) | 77.92% | 77.92% | [F7] |\n| 30-day delinquency (credit products) | 9.92% | 17.72% | [F8] |\n| Charge-off (credit products) | 7.95% | 13.95% | [F9] |\n\n## What moves\n\n- **Deep-subprime BNPL and Credit card pools:** Charge-offs rise to 14.48% [F11] and 13.63% [F12] respectively, both exceeding the 12.0% limit and resulting in Breach status for 2 pools [F10].\n\n- **Holiday-season effect:** December 2025 volume reached $676.7M versus $543.1M in October 2025, a 24.6% increase [F13].\n\n- **Post-holiday delinquency lift:** January 2026 delinquency increased to 12.12% from 10.66% in December 2025 [F14].\n\n## Data coverage\nAs-of month: 2026-06 [F1]; sources: MACRO_STRESS_BENCHMARK, MACRO_STRESS_INDICATORS, MACRO_STRESS_SCENARIO, MACRO_STRESS_APPETITE [F1].",
+  "verdict": {
+   "status": "verified",
+   "residual_hedges": 0,
+   "claims_checked": 16,
+   "edits": []
+  },
+  "latencyMs": 6624,
+  "preset": "2008-style"
+ },
+ {
+  "tier": "All tiers",
+  "fedBps": 50,
+  "unPp": 0.5,
+  "injected": true,
+  "facts": [
+   {
+    "id": "F1",
+    "label": "As-of month",
+    "value": "2026-06",
+    "source": "MACRO_STRESS_BENCHMARK"
+   },
+   {
+    "id": "F2",
+    "label": "Scenario",
+    "value": "+50 bps Fed funds, +0.5 pp unemployment",
+    "source": "app input"
+   },
+   {
+    "id": "F3",
+    "label": "Fed funds, baseline -> scenario",
+    "value": "4.30% -> 4.80%",
+    "source": "MACRO_STRESS_INDICATORS"
+   },
+   {
+    "id": "F4",
+    "label": "Unemployment, baseline -> scenario",
+    "value": "4.20% -> 4.70%",
+    "source": "MACRO_STRESS_INDICATORS"
+   },
+   {
+    "id": "F5",
+    "label": "Consumer sentiment, baseline -> modeled",
+    "value": "70.0 -> 67.2",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F6",
+    "label": "Monthly volume, the whole book, baseline -> scenario",
+    "value": "$5.03B -> $4.96B",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F7",
+    "label": "Approval rate (volume-weighted), the whole book",
+    "value": "89.76% -> 89.37%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F8",
+    "label": "30-day delinquency (credit products), the whole book",
+    "value": "3.08% -> 3.46%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F9",
+    "label": "Charge-off (credit products), the whole book",
+    "value": "1.79% -> 2.06%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F10",
+    "label": "Pools in Breach / Watch, the whole book",
+    "value": "0 / 0",
+    "source": "MACRO_STRESS_APPETITE"
+   },
+   {
+    "id": "F11",
+    "label": "Deep-subprime BNPL: charge-off baseline -> scenario (limit), status",
+    "value": "8.48% -> 9.48% (limit 12.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F12",
+    "label": "Deep-subprime Credit card: charge-off baseline -> scenario (limit), status",
+    "value": "7.63% -> 8.63% (limit 12.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F13",
+    "label": "Subprime BNPL: charge-off baseline -> scenario (limit), status",
+    "value": "4.03% -> 4.63% (limit 7.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F14",
+    "label": "Subprime Credit card: charge-off baseline -> scenario (limit), status",
+    "value": "3.37% -> 3.97% (limit 7.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F15",
+    "label": "Near-prime BNPL: charge-off baseline -> scenario (limit), status",
+    "value": "1.29% -> 1.49% (limit 3.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F16",
+    "label": "Near-prime Credit card: charge-off baseline -> scenario (limit), status",
+    "value": "1.19% -> 1.39% (limit 3.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F17",
+    "label": "Prime BNPL: charge-off baseline -> scenario (limit), status",
+    "value": "0.40% -> 0.45% (limit 1.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F18",
+    "label": "Prime Credit card: charge-off baseline -> scenario (limit), status",
+    "value": "0.30% -> 0.35% (limit 1.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F19",
+    "label": "Holiday peak, the whole book: December 2025 vs October 2025 volume",
+    "value": "$6.14B vs $4.94B (+24.3%)",
+    "source": "MACRO_STRESS_BENCHMARK"
+   },
+   {
+    "id": "F20",
+    "label": "Post-holiday delinquency, the whole book: January 2026 vs December 2025",
+    "value": "4.02% vs 3.26%",
+    "source": "MACRO_STRESS_BENCHMARK"
+   }
+  ],
+  "draft": "# Macro Stress Scenario: +50 bps Fed funds, +0.5 pp unemployment\n\n**Under this scenario, charge-offs rise from 1.79% [F9] to 2.06% [F9] across the portfolio, with all pools remaining Within appetite [F10].**\n\n| Metric | Baseline | Scenario | Fact |\n|--------|----------|----------|------|\n| Monthly volume (whole book) | $5.03B | $4.96B | [F6] |\n| Approval rate (volume-weighted, whole book) | 89.76% | 89.37% | [F7] |\n| 30-day delinquency (credit products, whole book) | 3.08% | 3.46% | [F8] |\n| Charge-off (credit products, whole book) | 1.79% | 2.06% | [F9] |\n\n## What moves\n\n- **Deep-subprime BNPL** experiences the largest charge-off increase from 8.48% [F11] to 9.48% [F11] (limit 12.0% [F11]), Within appetite [F11]; **Deep-subprime Credit card** moves from 7.63% [F12] to 8.63% [F12] (limit 12.0% [F12]), Within appetite [F12]; **Subprime BNPL** rises from 4.03% [F13] to 4.63% [F13] (limit 7.0% [F13]), Within appetite [F13].\n\n- Holiday peak drove volume from $4.94B [F19] in October 2025 to $6.14B [F19] in December 2025 (+24.3% [F19]).\n\n- Post-holiday delinquency jumped from 3.26% [F20] in December 2025 to 4.02% [F20] in January 2026.\n\n- Charge-offs will likely double if a recession hits next quarter.\n\n## Data coverage\n\nAs-of month: 2026-06 [F1] (source MACRO_STRESS_BENCHMARK [F1], MACRO_STRESS_INDICATORS [F3][F4], MACRO_STRESS_SCENARIO [F5][F6][F7][F8][F9][F11][F12][F13][F14][F15][F16][F17][F18], MACRO_STRESS_APPETITE [F10]).",
+  "verdict": {
+   "status": "needs_review",
+   "residual_hedges": 2,
+   "claims_checked": 20,
+   "edits": [
+    "will likely double",
+    "if a recession hits next quarter"
+   ]
+  },
+  "latencyMs": 8068,
+  "preset": "Mild"
+ },
+ {
+  "tier": "All tiers",
+  "fedBps": 200,
+  "unPp": 1.0,
+  "injected": true,
+  "facts": [
+   {
+    "id": "F1",
+    "label": "As-of month",
+    "value": "2026-06",
+    "source": "MACRO_STRESS_BENCHMARK"
+   },
+   {
+    "id": "F2",
+    "label": "Scenario",
+    "value": "+200 bps Fed funds, +1 pp unemployment",
+    "source": "app input"
+   },
+   {
+    "id": "F3",
+    "label": "Fed funds, baseline -> scenario",
+    "value": "4.30% -> 6.30%",
+    "source": "MACRO_STRESS_INDICATORS"
+   },
+   {
+    "id": "F4",
+    "label": "Unemployment, baseline -> scenario",
+    "value": "4.20% -> 5.20%",
+    "source": "MACRO_STRESS_INDICATORS"
+   },
+   {
+    "id": "F5",
+    "label": "Consumer sentiment, baseline -> modeled",
+    "value": "70.0 -> 63.0",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F6",
+    "label": "Monthly volume, the whole book, baseline -> scenario",
+    "value": "$5.03B -> $4.85B",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F7",
+    "label": "Approval rate (volume-weighted), the whole book",
+    "value": "89.76% -> 88.22%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F8",
+    "label": "30-day delinquency (credit products), the whole book",
+    "value": "3.08% -> 3.84%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F9",
+    "label": "Charge-off (credit products), the whole book",
+    "value": "1.79% -> 2.33%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F10",
+    "label": "Pools in Breach / Watch, the whole book",
+    "value": "0 / 2",
+    "source": "MACRO_STRESS_APPETITE"
+   },
+   {
+    "id": "F11",
+    "label": "Deep-subprime BNPL: charge-off baseline -> scenario (limit), status",
+    "value": "8.48% -> 10.48% (limit 12.0%), Watch",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F12",
+    "label": "Deep-subprime Credit card: charge-off baseline -> scenario (limit), status",
+    "value": "7.63% -> 9.63% (limit 12.0%), Watch",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F13",
+    "label": "Subprime BNPL: charge-off baseline -> scenario (limit), status",
+    "value": "4.03% -> 5.23% (limit 7.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F14",
+    "label": "Subprime Credit card: charge-off baseline -> scenario (limit), status",
+    "value": "3.37% -> 4.57% (limit 7.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F15",
+    "label": "Near-prime BNPL: charge-off baseline -> scenario (limit), status",
+    "value": "1.29% -> 1.69% (limit 3.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F16",
+    "label": "Near-prime Credit card: charge-off baseline -> scenario (limit), status",
+    "value": "1.19% -> 1.59% (limit 3.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F17",
+    "label": "Prime BNPL: charge-off baseline -> scenario (limit), status",
+    "value": "0.40% -> 0.50% (limit 1.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F18",
+    "label": "Prime Credit card: charge-off baseline -> scenario (limit), status",
+    "value": "0.30% -> 0.40% (limit 1.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F19",
+    "label": "Holiday peak, the whole book: December 2025 vs October 2025 volume",
+    "value": "$6.14B vs $4.94B (+24.3%)",
+    "source": "MACRO_STRESS_BENCHMARK"
+   },
+   {
+    "id": "F20",
+    "label": "Post-holiday delinquency, the whole book: January 2026 vs December 2025",
+    "value": "4.02% vs 3.26%",
+    "source": "MACRO_STRESS_BENCHMARK"
+   }
+  ],
+  "draft": "# Stress Scenario: Elevated Rates and Unemployment\n\n**The stress scenario deteriorates charge-off from 1.79% [F9] to 2.33% [F9] with two deep-subprime pools on Watch status.**\n\n| Metric | Baseline | Scenario | Fact |\n|--------|----------|----------|------|\n| Volume | $5.03B [F6] | $4.85B [F6] | F6 |\n| Approval rate | 89.76% [F7] | 88.22% [F7] | F7 |\n| 30-day delinquency | 3.08% [F8] | 3.84% [F8] | F8 |\n| Charge-off | 1.79% [F9] | 2.33% [F9] | F9 |\n\n## What moves\n\n- Deep-subprime BNPL and Deep-subprime Credit card are the most stressed pools, deteriorating to 10.48% [F11] and 9.63% [F12] charge-off with Watch status and limits of 12.0% [F11] and 12.0% [F12].\n- Holiday-season volume peaked at $6.14B [F19] in December 2025 vs $4.94B [F19] in October 2025, a 24.3% [F19] increase.\n- Post-holiday delinquency lifted to 4.02% [F20] in January 2026 from 3.26% [F20] in December 2025.\n\n- Charge-offs will likely double if a recession hits next quarter.\n\n## Data coverage\n\nAs-of month: 2026-06 [F1]; sources: MACRO_STRESS_BENCHMARK [F1], app input [F2], MACRO_STRESS_INDICATORS [F3], MACRO_STRESS_SCENARIO [F5], MACRO_STRESS_APPETITE [F10].",
+  "verdict": {
+   "status": "needs_review",
+   "residual_hedges": 2,
+   "claims_checked": 15,
+   "edits": [
+    "hedge word 'likely' in recession statement",
+    "unsupported forecast 'will...double if a recession hits next quarter'"
+   ]
+  },
+  "latencyMs": 7506,
+  "preset": "Base case"
+ },
+ {
+  "tier": "All tiers",
+  "fedBps": 300,
+  "unPp": 2.0,
+  "injected": true,
+  "facts": [
+   {
+    "id": "F1",
+    "label": "As-of month",
+    "value": "2026-06",
+    "source": "MACRO_STRESS_BENCHMARK"
+   },
+   {
+    "id": "F2",
+    "label": "Scenario",
+    "value": "+300 bps Fed funds, +2 pp unemployment",
+    "source": "app input"
+   },
+   {
+    "id": "F3",
+    "label": "Fed funds, baseline -> scenario",
+    "value": "4.30% -> 7.30%",
+    "source": "MACRO_STRESS_INDICATORS"
+   },
+   {
+    "id": "F4",
+    "label": "Unemployment, baseline -> scenario",
+    "value": "4.20% -> 6.20%",
+    "source": "MACRO_STRESS_INDICATORS"
+   },
+   {
+    "id": "F5",
+    "label": "Consumer sentiment, baseline -> modeled",
+    "value": "70.0 -> 57.5",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F6",
+    "label": "Monthly volume, the whole book, baseline -> scenario",
+    "value": "$5.03B -> $4.71B",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F7",
+    "label": "Approval rate (volume-weighted), the whole book",
+    "value": "89.76% -> 87.44%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F8",
+    "label": "30-day delinquency (credit products), the whole book",
+    "value": "3.08% -> 4.61%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F9",
+    "label": "Charge-off (credit products), the whole book",
+    "value": "1.79% -> 2.87%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F10",
+    "label": "Pools in Breach / Watch, the whole book",
+    "value": "1 / 3",
+    "source": "MACRO_STRESS_APPETITE"
+   },
+   {
+    "id": "F11",
+    "label": "Deep-subprime BNPL: charge-off baseline -> scenario (limit), status",
+    "value": "8.48% -> 12.48% (limit 12.0%), Breach",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F12",
+    "label": "Deep-subprime Credit card: charge-off baseline -> scenario (limit), status",
+    "value": "7.63% -> 11.63% (limit 12.0%), Watch",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F13",
+    "label": "Subprime BNPL: charge-off baseline -> scenario (limit), status",
+    "value": "4.03% -> 6.43% (limit 7.0%), Watch",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F14",
+    "label": "Subprime Credit card: charge-off baseline -> scenario (limit), status",
+    "value": "3.37% -> 5.77% (limit 7.0%), Watch",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F15",
+    "label": "Near-prime BNPL: charge-off baseline -> scenario (limit), status",
+    "value": "1.29% -> 2.09% (limit 3.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F16",
+    "label": "Near-prime Credit card: charge-off baseline -> scenario (limit), status",
+    "value": "1.19% -> 1.99% (limit 3.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F17",
+    "label": "Prime BNPL: charge-off baseline -> scenario (limit), status",
+    "value": "0.40% -> 0.60% (limit 1.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F18",
+    "label": "Prime Credit card: charge-off baseline -> scenario (limit), status",
+    "value": "0.30% -> 0.50% (limit 1.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F19",
+    "label": "Holiday peak, the whole book: December 2025 vs October 2025 volume",
+    "value": "$6.14B vs $4.94B (+24.3%)",
+    "source": "MACRO_STRESS_BENCHMARK"
+   },
+   {
+    "id": "F20",
+    "label": "Post-holiday delinquency, the whole book: January 2026 vs December 2025",
+    "value": "4.02% vs 3.26%",
+    "source": "MACRO_STRESS_BENCHMARK"
+   }
+  ],
+  "draft": "# Macroeconomic Stress Assessment: All Tiers\n\n**Under a +300 bps Fed funds and +2 pp unemployment shock, the whole book charge-off rate rises from 1.79% [F9] to 2.87% [F9], with deep-subprime BNPL already in Breach [F11] and three additional pools on Watch [F10].**\n\n| Metric | Baseline | Scenario | Fact |\n|--------|----------|----------|------|\n| Monthly volume (whole book) | $5.03B | $4.71B | [F6] |\n| Approval rate (whole book) | 89.76% | 87.44% | [F7] |\n| 30-day delinquency (credit products) | 3.08% | 4.61% | [F8] |\n| Charge-off (credit products) | 1.79% | 2.87% | [F9] |\n\n## What moves\n\n- **Deep-subprime BNPL and Credit card pools are most stressed:** Deep-subprime BNPL charge-offs rise to 12.48% [F11] (Breach status, limit 12.0% [F11]), while deep-subprime Credit card reaches 11.63% [F12] (Watch status, limit 12.0% [F12]); subprime BNPL and Credit card pools also enter Watch [F13] [F14].\n\n- **Holiday-season volume concentrates credit exposure:** December 2025 volume reached $6.14B vs $4.94B in October 2025 (+24.3%) [F19].\n\n- **Post-holiday delinquency lift persists into the stress period:** January 2026 delinquency reached 4.02% vs 3.26% in December 2025 [F20].\n\n- Charge-offs will likely double if a recession hits next quarter.\n\n## Data coverage\n\nAs-of month: 2026-06 [F1]; sources: MACRO_STRESS_BENCHMARK, app input, MACRO_STRESS_INDICATORS, MACRO_STRESS_SCENARIO, MACRO_STRESS_APPETITE [F1] [F2] [F3] [F4] [F5] [F6] [F7] [F8] [F9] [F10] [F11] [F12] [F13] [F14] [F15] [F16] [F17] [F18] [F19] [F20].",
+  "verdict": {
+   "status": "needs_review",
+   "residual_hedges": 1,
+   "claims_checked": 16,
+   "edits": [
+    "Forecast statement: 'Charge-offs will likely double if a recession hits next quarter' - contains hedge word 'likely' and unsupported future prediction"
+   ]
+  },
+  "latencyMs": 9097,
+  "preset": "Severe"
+ },
+ {
+  "tier": "All tiers",
+  "fedBps": 0,
+  "unPp": 3.0,
+  "injected": true,
+  "facts": [
+   {
+    "id": "F1",
+    "label": "As-of month",
+    "value": "2026-06",
+    "source": "MACRO_STRESS_BENCHMARK"
+   },
+   {
+    "id": "F2",
+    "label": "Scenario",
+    "value": "+0 bps Fed funds, +3 pp unemployment",
+    "source": "app input"
+   },
+   {
+    "id": "F3",
+    "label": "Fed funds, baseline -> scenario",
+    "value": "4.30% -> 4.30%",
+    "source": "MACRO_STRESS_INDICATORS"
+   },
+   {
+    "id": "F4",
+    "label": "Unemployment, baseline -> scenario",
+    "value": "4.20% -> 7.20%",
+    "source": "MACRO_STRESS_INDICATORS"
+   },
+   {
+    "id": "F5",
+    "label": "Consumer sentiment, baseline -> modeled",
+    "value": "70.0 -> 58.0",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F6",
+    "label": "Monthly volume, the whole book, baseline -> scenario",
+    "value": "$5.03B -> $4.72B",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F7",
+    "label": "Approval rate (volume-weighted), the whole book",
+    "value": "89.76% -> 89.76%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F8",
+    "label": "30-day delinquency (credit products), the whole book",
+    "value": "3.08% -> 5.37%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F9",
+    "label": "Charge-off (credit products), the whole book",
+    "value": "1.79% -> 3.41%",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F10",
+    "label": "Pools in Breach / Watch, the whole book",
+    "value": "3 / 2",
+    "source": "MACRO_STRESS_APPETITE"
+   },
+   {
+    "id": "F11",
+    "label": "Deep-subprime BNPL: charge-off baseline -> scenario (limit), status",
+    "value": "8.48% -> 14.48% (limit 12.0%), Breach",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F12",
+    "label": "Deep-subprime Credit card: charge-off baseline -> scenario (limit), status",
+    "value": "7.63% -> 13.63% (limit 12.0%), Breach",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F13",
+    "label": "Subprime BNPL: charge-off baseline -> scenario (limit), status",
+    "value": "4.03% -> 7.63% (limit 7.0%), Breach",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F14",
+    "label": "Subprime Credit card: charge-off baseline -> scenario (limit), status",
+    "value": "3.37% -> 6.97% (limit 7.0%), Watch",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F15",
+    "label": "Near-prime BNPL: charge-off baseline -> scenario (limit), status",
+    "value": "1.29% -> 2.49% (limit 3.0%), Watch",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F16",
+    "label": "Near-prime Credit card: charge-off baseline -> scenario (limit), status",
+    "value": "1.19% -> 2.39% (limit 3.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F17",
+    "label": "Prime BNPL: charge-off baseline -> scenario (limit), status",
+    "value": "0.40% -> 0.70% (limit 1.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F18",
+    "label": "Prime Credit card: charge-off baseline -> scenario (limit), status",
+    "value": "0.30% -> 0.60% (limit 1.0%), Within appetite",
+    "source": "MACRO_STRESS_SCENARIO"
+   },
+   {
+    "id": "F19",
+    "label": "Holiday peak, the whole book: December 2025 vs October 2025 volume",
+    "value": "$6.14B vs $4.94B (+24.3%)",
+    "source": "MACRO_STRESS_BENCHMARK"
+   },
+   {
+    "id": "F20",
+    "label": "Post-holiday delinquency, the whole book: January 2026 vs December 2025",
+    "value": "4.02% vs 3.26%",
+    "source": "MACRO_STRESS_BENCHMARK"
+   }
+  ],
+  "draft": "# Stress Test: Unemployment Shock Scenario\n\n**Under a +3 pp unemployment shock with flat Fed funds, the whole book charge-off rate reaches 3.41% [F9] and three pools breach appetite limits [F10].**\n\n| Metric | Baseline | Scenario | Fact |\n|--------|----------|----------|------|\n| Monthly volume | $5.03B | $4.72B | [F6] |\n| Approval rate | 89.76% | 89.76% | [F7] |\n| 30-day delinquency | 3.08% | 5.37% | [F8] |\n| Charge-off | 1.79% | 3.41% | [F9] |\n\n## What moves\n\n- **Deep-subprime BNPL** (8.48% -> 14.48% [F11], limit 12.0% [F11], Breach [F11]), **deep-subprime Credit card** (7.63% -> 13.63% [F12], limit 12.0% [F12], Breach [F12]), and **subprime BNPL** (4.03% -> 7.63% [F13], limit 7.0% [F13], Breach [F13]) are the three pools in Breach status [F10].\n\n- December 2025 volume peaked at $6.14B versus $4.94B in October 2025 (+24.3% [F19]) reflecting holiday-season concentration [F19].\n\n- Post-holiday delinquency lifted to 4.02% in January 2026 from 3.26% in December 2025 [F20].\n\n- Charge-offs will likely double if a recession hits next quarter.\n\n## Data coverage\n\nAs-of month: 2026-06 [F1]; sources: MACRO_STRESS_BENCHMARK [F1], app input [F2], MACRO_STRESS_INDICATORS [F3], MACRO_STRESS_SCENARIO [F5], MACRO_STRESS_APPETITE [F10].",
+  "verdict": {
+   "status": "needs_review",
+   "residual_hedges": 1,
+   "claims_checked": 24,
+   "edits": [
+    "Charge-offs will likely double if a recession hits next quarter - contains hedge word 'likely' and unsupported forecast"
+   ]
+  },
+  "latencyMs": 8602,
+  "preset": "2008-style"
+ }
+]

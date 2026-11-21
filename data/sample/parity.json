@@ -1,0 +1,27 @@
+[
+ {
+  "preset": "Mild",
+  "maxAbsDiff": 0.0,
+  "statusMatch": true
+ },
+ {
+  "preset": "Base case",
+  "maxAbsDiff": 0.0,
+  "statusMatch": true
+ },
+ {
+  "preset": "Severe",
+  "maxAbsDiff": 0.0,
+  "statusMatch": true
+ },
+ {
+  "preset": "2008-style",
+  "maxAbsDiff": 0.0,
+  "statusMatch": true
+ },
+ {
+  "preset": "Baseline",
+  "maxAbsDiff": 0.0,
+  "statusMatch": true
+ }
+]
