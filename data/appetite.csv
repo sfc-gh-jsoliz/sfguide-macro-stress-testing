@@ -1,0 +1,5 @@
+credit_tier,charge_off_limit,watch_share
+Prime,0.01,0.8
+Near-prime,0.03,0.8
+Subprime,0.07,0.8
+Deep-subprime,0.12,0.8
