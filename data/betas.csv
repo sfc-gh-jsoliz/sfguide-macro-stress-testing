@@ -1,0 +1,17 @@
+credit_tier,product,portfolio_metric,indicator_key,beta,note
+Prime,ALL,approval_rate,FED_FUNDS,-0.002,approval_rate change per +1pp Fed funds
+Near-prime,ALL,approval_rate,FED_FUNDS,-0.006,approval_rate change per +1pp Fed funds
+Subprime,ALL,approval_rate,FED_FUNDS,-0.014,approval_rate change per +1pp Fed funds
+Deep-subprime,ALL,approval_rate,FED_FUNDS,-0.022,approval_rate change per +1pp Fed funds
+Prime,ALL,charge_off_rate,UNEMPLOYMENT,0.001,charge_off_rate change per +1pp unemployment
+Near-prime,ALL,charge_off_rate,UNEMPLOYMENT,0.004,charge_off_rate change per +1pp unemployment
+Subprime,ALL,charge_off_rate,UNEMPLOYMENT,0.012,charge_off_rate change per +1pp unemployment
+Deep-subprime,ALL,charge_off_rate,UNEMPLOYMENT,0.02,charge_off_rate change per +1pp unemployment
+Prime,ALL,delinquency_rate_30d,UNEMPLOYMENT,0.002,30d delinquency change per +1pp unemployment
+Near-prime,ALL,delinquency_rate_30d,UNEMPLOYMENT,0.006,30d delinquency change per +1pp unemployment
+Subprime,ALL,delinquency_rate_30d,UNEMPLOYMENT,0.016,30d delinquency change per +1pp unemployment
+Deep-subprime,ALL,delinquency_rate_30d,UNEMPLOYMENT,0.026,30d delinquency change per +1pp unemployment
+Prime,ALL,transaction_volume_usd,SENTIMENT,0.004,volume pct change per +1pt consumer sentiment
+Near-prime,ALL,transaction_volume_usd,SENTIMENT,0.005,volume pct change per +1pt consumer sentiment
+Subprime,ALL,transaction_volume_usd,SENTIMENT,0.006,volume pct change per +1pt consumer sentiment
+Deep-subprime,ALL,transaction_volume_usd,SENTIMENT,0.007,volume pct change per +1pt consumer sentiment

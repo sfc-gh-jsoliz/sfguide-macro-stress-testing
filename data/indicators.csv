@@ -1,0 +1,121 @@
+indicator_key,indicator_name,source,unit,month_end,indicator_value
+CPI,"CPI: All items (SA, 1982-84=100)",Bureau of Labor Statistics,Index,2024-07-31,310.0
+CPI,"CPI: All items (SA, 1982-84=100)",Bureau of Labor Statistics,Index,2024-08-31,310.42
+CPI,"CPI: All items (SA, 1982-84=100)",Bureau of Labor Statistics,Index,2024-09-30,310.84
+CPI,"CPI: All items (SA, 1982-84=100)",Bureau of Labor Statistics,Index,2024-10-31,311.26
+CPI,"CPI: All items (SA, 1982-84=100)",Bureau of Labor Statistics,Index,2024-11-30,311.68
+CPI,"CPI: All items (SA, 1982-84=100)",Bureau of Labor Statistics,Index,2024-12-31,312.1
+CPI,"CPI: All items (SA, 1982-84=100)",Bureau of Labor Statistics,Index,2025-01-31,312.52
+CPI,"CPI: All items (SA, 1982-84=100)",Bureau of Labor Statistics,Index,2025-02-28,312.94
+CPI,"CPI: All items (SA, 1982-84=100)",Bureau of Labor Statistics,Index,2025-03-31,313.36
+CPI,"CPI: All items (SA, 1982-84=100)",Bureau of Labor Statistics,Index,2025-04-30,313.78
+CPI,"CPI: All items (SA, 1982-84=100)",Bureau of Labor Statistics,Index,2025-05-31,314.2
+CPI,"CPI: All items (SA, 1982-84=100)",Bureau of Labor Statistics,Index,2025-06-30,314.62
+CPI,"CPI: All items (SA, 1982-84=100)",Bureau of Labor Statistics,Index,2025-07-31,315.04
+CPI,"CPI: All items (SA, 1982-84=100)",Bureau of Labor Statistics,Index,2025-08-31,315.46
+CPI,"CPI: All items (SA, 1982-84=100)",Bureau of Labor Statistics,Index,2025-09-30,315.88
+CPI,"CPI: All items (SA, 1982-84=100)",Bureau of Labor Statistics,Index,2025-10-31,316.3
+CPI,"CPI: All items (SA, 1982-84=100)",Bureau of Labor Statistics,Index,2025-11-30,316.72
+CPI,"CPI: All items (SA, 1982-84=100)",Bureau of Labor Statistics,Index,2025-12-31,317.14
+CPI,"CPI: All items (SA, 1982-84=100)",Bureau of Labor Statistics,Index,2026-01-31,317.56
+CPI,"CPI: All items (SA, 1982-84=100)",Bureau of Labor Statistics,Index,2026-02-28,317.98
+CPI,"CPI: All items (SA, 1982-84=100)",Bureau of Labor Statistics,Index,2026-03-31,318.4
+CPI,"CPI: All items (SA, 1982-84=100)",Bureau of Labor Statistics,Index,2026-04-30,318.82
+CPI,"CPI: All items (SA, 1982-84=100)",Bureau of Labor Statistics,Index,2026-05-31,319.24
+CPI,"CPI: All items (SA, 1982-84=100)",Bureau of Labor Statistics,Index,2026-06-30,319.66
+UNEMPLOYMENT,Unemployment Rate (SA),Bureau of Labor Statistics,Percent,2024-07-31,4.3
+UNEMPLOYMENT,Unemployment Rate (SA),Bureau of Labor Statistics,Percent,2024-08-31,4.2
+UNEMPLOYMENT,Unemployment Rate (SA),Bureau of Labor Statistics,Percent,2024-09-30,4.1
+UNEMPLOYMENT,Unemployment Rate (SA),Bureau of Labor Statistics,Percent,2024-10-31,4.0
+UNEMPLOYMENT,Unemployment Rate (SA),Bureau of Labor Statistics,Percent,2024-11-30,4.1
+UNEMPLOYMENT,Unemployment Rate (SA),Bureau of Labor Statistics,Percent,2024-12-31,4.2
+UNEMPLOYMENT,Unemployment Rate (SA),Bureau of Labor Statistics,Percent,2025-01-31,4.3
+UNEMPLOYMENT,Unemployment Rate (SA),Bureau of Labor Statistics,Percent,2025-02-28,4.2
+UNEMPLOYMENT,Unemployment Rate (SA),Bureau of Labor Statistics,Percent,2025-03-31,4.1
+UNEMPLOYMENT,Unemployment Rate (SA),Bureau of Labor Statistics,Percent,2025-04-30,4.0
+UNEMPLOYMENT,Unemployment Rate (SA),Bureau of Labor Statistics,Percent,2025-05-31,4.1
+UNEMPLOYMENT,Unemployment Rate (SA),Bureau of Labor Statistics,Percent,2025-06-30,4.2
+UNEMPLOYMENT,Unemployment Rate (SA),Bureau of Labor Statistics,Percent,2025-07-31,4.3
+UNEMPLOYMENT,Unemployment Rate (SA),Bureau of Labor Statistics,Percent,2025-08-31,4.2
+UNEMPLOYMENT,Unemployment Rate (SA),Bureau of Labor Statistics,Percent,2025-09-30,4.1
+UNEMPLOYMENT,Unemployment Rate (SA),Bureau of Labor Statistics,Percent,2025-10-31,4.0
+UNEMPLOYMENT,Unemployment Rate (SA),Bureau of Labor Statistics,Percent,2025-11-30,4.1
+UNEMPLOYMENT,Unemployment Rate (SA),Bureau of Labor Statistics,Percent,2025-12-31,4.2
+UNEMPLOYMENT,Unemployment Rate (SA),Bureau of Labor Statistics,Percent,2026-01-31,4.3
+UNEMPLOYMENT,Unemployment Rate (SA),Bureau of Labor Statistics,Percent,2026-02-28,4.2
+UNEMPLOYMENT,Unemployment Rate (SA),Bureau of Labor Statistics,Percent,2026-03-31,4.1
+UNEMPLOYMENT,Unemployment Rate (SA),Bureau of Labor Statistics,Percent,2026-04-30,4.0
+UNEMPLOYMENT,Unemployment Rate (SA),Bureau of Labor Statistics,Percent,2026-05-31,4.1
+UNEMPLOYMENT,Unemployment Rate (SA),Bureau of Labor Statistics,Percent,2026-06-30,4.2
+FED_FUNDS,Effective Federal Funds Rate (EFFR),New York Fed,Percent,2024-07-31,5.33
+FED_FUNDS,Effective Federal Funds Rate (EFFR),New York Fed,Percent,2024-08-31,5.29
+FED_FUNDS,Effective Federal Funds Rate (EFFR),New York Fed,Percent,2024-09-30,5.24
+FED_FUNDS,Effective Federal Funds Rate (EFFR),New York Fed,Percent,2024-10-31,5.2
+FED_FUNDS,Effective Federal Funds Rate (EFFR),New York Fed,Percent,2024-11-30,5.15
+FED_FUNDS,Effective Federal Funds Rate (EFFR),New York Fed,Percent,2024-12-31,5.11
+FED_FUNDS,Effective Federal Funds Rate (EFFR),New York Fed,Percent,2025-01-31,5.06
+FED_FUNDS,Effective Federal Funds Rate (EFFR),New York Fed,Percent,2025-02-28,5.01
+FED_FUNDS,Effective Federal Funds Rate (EFFR),New York Fed,Percent,2025-03-31,4.97
+FED_FUNDS,Effective Federal Funds Rate (EFFR),New York Fed,Percent,2025-04-30,4.92
+FED_FUNDS,Effective Federal Funds Rate (EFFR),New York Fed,Percent,2025-05-31,4.88
+FED_FUNDS,Effective Federal Funds Rate (EFFR),New York Fed,Percent,2025-06-30,4.83
+FED_FUNDS,Effective Federal Funds Rate (EFFR),New York Fed,Percent,2025-07-31,4.79
+FED_FUNDS,Effective Federal Funds Rate (EFFR),New York Fed,Percent,2025-08-31,4.75
+FED_FUNDS,Effective Federal Funds Rate (EFFR),New York Fed,Percent,2025-09-30,4.7
+FED_FUNDS,Effective Federal Funds Rate (EFFR),New York Fed,Percent,2025-10-31,4.66
+FED_FUNDS,Effective Federal Funds Rate (EFFR),New York Fed,Percent,2025-11-30,4.61
+FED_FUNDS,Effective Federal Funds Rate (EFFR),New York Fed,Percent,2025-12-31,4.57
+FED_FUNDS,Effective Federal Funds Rate (EFFR),New York Fed,Percent,2026-01-31,4.52
+FED_FUNDS,Effective Federal Funds Rate (EFFR),New York Fed,Percent,2026-02-28,4.47
+FED_FUNDS,Effective Federal Funds Rate (EFFR),New York Fed,Percent,2026-03-31,4.43
+FED_FUNDS,Effective Federal Funds Rate (EFFR),New York Fed,Percent,2026-04-30,4.38
+FED_FUNDS,Effective Federal Funds Rate (EFFR),New York Fed,Percent,2026-05-31,4.34
+FED_FUNDS,Effective Federal Funds Rate (EFFR),New York Fed,Percent,2026-06-30,4.3
+PCE,"PCE Price Index (SA, 2017=100)",Bureau of Economic Analysis,Index,2024-07-31,122.0
+PCE,"PCE Price Index (SA, 2017=100)",Bureau of Economic Analysis,Index,2024-08-31,122.28
+PCE,"PCE Price Index (SA, 2017=100)",Bureau of Economic Analysis,Index,2024-09-30,122.56
+PCE,"PCE Price Index (SA, 2017=100)",Bureau of Economic Analysis,Index,2024-10-31,122.84
+PCE,"PCE Price Index (SA, 2017=100)",Bureau of Economic Analysis,Index,2024-11-30,123.12
+PCE,"PCE Price Index (SA, 2017=100)",Bureau of Economic Analysis,Index,2024-12-31,123.4
+PCE,"PCE Price Index (SA, 2017=100)",Bureau of Economic Analysis,Index,2025-01-31,123.68
+PCE,"PCE Price Index (SA, 2017=100)",Bureau of Economic Analysis,Index,2025-02-28,123.96
+PCE,"PCE Price Index (SA, 2017=100)",Bureau of Economic Analysis,Index,2025-03-31,124.24
+PCE,"PCE Price Index (SA, 2017=100)",Bureau of Economic Analysis,Index,2025-04-30,124.52
+PCE,"PCE Price Index (SA, 2017=100)",Bureau of Economic Analysis,Index,2025-05-31,124.8
+PCE,"PCE Price Index (SA, 2017=100)",Bureau of Economic Analysis,Index,2025-06-30,125.08
+PCE,"PCE Price Index (SA, 2017=100)",Bureau of Economic Analysis,Index,2025-07-31,125.36
+PCE,"PCE Price Index (SA, 2017=100)",Bureau of Economic Analysis,Index,2025-08-31,125.64
+PCE,"PCE Price Index (SA, 2017=100)",Bureau of Economic Analysis,Index,2025-09-30,125.92
+PCE,"PCE Price Index (SA, 2017=100)",Bureau of Economic Analysis,Index,2025-10-31,126.2
+PCE,"PCE Price Index (SA, 2017=100)",Bureau of Economic Analysis,Index,2025-11-30,126.48
+PCE,"PCE Price Index (SA, 2017=100)",Bureau of Economic Analysis,Index,2025-12-31,126.76
+PCE,"PCE Price Index (SA, 2017=100)",Bureau of Economic Analysis,Index,2026-01-31,127.04
+PCE,"PCE Price Index (SA, 2017=100)",Bureau of Economic Analysis,Index,2026-02-28,127.32
+PCE,"PCE Price Index (SA, 2017=100)",Bureau of Economic Analysis,Index,2026-03-31,127.6
+PCE,"PCE Price Index (SA, 2017=100)",Bureau of Economic Analysis,Index,2026-04-30,127.88
+PCE,"PCE Price Index (SA, 2017=100)",Bureau of Economic Analysis,Index,2026-05-31,128.16
+PCE,"PCE Price Index (SA, 2017=100)",Bureau of Economic Analysis,Index,2026-06-30,128.44
+SENTIMENT,Index of Consumer Sentiment,University of Michigan,Index,2024-07-31,67.0
+SENTIMENT,Index of Consumer Sentiment,University of Michigan,Index,2024-08-31,67.98
+SENTIMENT,Index of Consumer Sentiment,University of Michigan,Index,2024-09-30,68.86
+SENTIMENT,Index of Consumer Sentiment,University of Michigan,Index,2024-10-31,69.52
+SENTIMENT,Index of Consumer Sentiment,University of Michigan,Index,2024-11-30,69.92
+SENTIMENT,Index of Consumer Sentiment,University of Michigan,Index,2024-12-31,69.99
+SENTIMENT,Index of Consumer Sentiment,University of Michigan,Index,2025-01-31,69.73
+SENTIMENT,Index of Consumer Sentiment,University of Michigan,Index,2025-02-28,69.17
+SENTIMENT,Index of Consumer Sentiment,University of Michigan,Index,2025-03-31,68.37
+SENTIMENT,Index of Consumer Sentiment,University of Michigan,Index,2025-04-30,67.42
+SENTIMENT,Index of Consumer Sentiment,University of Michigan,Index,2025-05-31,66.43
+SENTIMENT,Index of Consumer Sentiment,University of Michigan,Index,2025-06-30,65.5
+SENTIMENT,Index of Consumer Sentiment,University of Michigan,Index,2025-07-31,64.73
+SENTIMENT,Index of Consumer Sentiment,University of Michigan,Index,2025-08-31,64.21
+SENTIMENT,Index of Consumer Sentiment,University of Michigan,Index,2025-09-30,64.0
+SENTIMENT,Index of Consumer Sentiment,University of Michigan,Index,2025-10-31,64.12
+SENTIMENT,Index of Consumer Sentiment,University of Michigan,Index,2025-11-30,64.56
+SENTIMENT,Index of Consumer Sentiment,University of Michigan,Index,2025-12-31,65.27
+SENTIMENT,Index of Consumer Sentiment,University of Michigan,Index,2026-01-31,66.16
+SENTIMENT,Index of Consumer Sentiment,University of Michigan,Index,2026-02-28,67.15
+SENTIMENT,Index of Consumer Sentiment,University of Michigan,Index,2026-03-31,68.12
+SENTIMENT,Index of Consumer Sentiment,University of Michigan,Index,2026-04-30,68.97
+SENTIMENT,Index of Consumer Sentiment,University of Michigan,Index,2026-05-31,69.6
+SENTIMENT,Index of Consumer Sentiment,University of Michigan,Index,2026-06-30,69.95

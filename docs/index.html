@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Macro Stress Testing · Halvorn Stress Desk · Snowflake example</title>
+<meta name="description" content="See how a payments book moves when Fed funds and unemployment turn: per-tier stress scenarios, appetite breaches, and AI stress notes that cite every number. Synthetic data, runs on Snowflake.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='1' y='1' width='30' height='30' rx='7' fill='%231F2328'/%3E%3Cpath d='M5 8 C 13 9, 19 14, 27 23' stroke='%23D9693D' stroke-width='2.4' fill='none'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="site.css">
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="./"><svg viewBox="0 0 32 32" width="26" height="26" aria-hidden="true"><rect x="1" y="1" width="30" height="30" rx="7" fill="#1F2328"/><rect x="7" y="9" width="4" height="15" rx="1" fill="#E9DFCC"/><rect x="14" y="13" width="4" height="11" rx="1" fill="#E9DFCC"/><rect x="21" y="17" width="4" height="7" rx="1" fill="#E9DFCC"/><path d="M5 8 C 13 9, 19 14, 27 23" stroke="#D9693D" stroke-width="2.4" fill="none" stroke-linecap="round"/></svg><b>HALVORN</b><span>Stress Desk · a Snowflake example</span></a>
+  <nav><a href="#walkthrough">Walkthrough</a><a href="#how">How it works</a><a href="#run">Run it</a><a href="https://github.com/sfc-gh-jsoliz/sfguide-macro-stress-testing">Repository</a><a class="cta" href="try/">Try it</a></nav>
+</header>
+
+<main>
+<section class="hero">
+  <div class="hero-copy">
+    <p class="eyebrow">Payments · Risk and FP&amp;A · Macro stress testing</p>
+    <h1>When rates climb and jobs soften, <em>which part of your book breaks first?</em></h1>
+    <p class="lede">Every planning cycle, a processor's risk and FP&amp;A (financial planning and analysis) team gets the same question: what happens to our book if the macro environment turns? This example answers it for a fictional processor, Quillmar Payments. Shock Fed funds and unemployment, watch approval, delinquency and charge-off move tier by tier against risk appetite, then hand the committee a stress note in which every number cites a fact and a second AI pass checks it.</p>
+    <div class="actions"><a class="btn primary" href="try/">Try the example in your browser</a><a class="btn" href="https://github.com/sfc-gh-jsoliz/sfguide-macro-stress-testing">View the repository</a></div>
+    <p class="fine">No account needed for the hosted example: synthetic data, AI answers captured from a Live run.</p>
+  </div>
+  <figure class="fan" aria-labelledby="fan-cap">
+    <svg viewBox="0 0 560 300" role="img" aria-label="Line chart: charge-off rate by credit tier rising as the unemployment shock goes from 0 to 3 points. Deep-subprime climbs steepest, Prime barely moves.">
+      <g class="axis"><line x1="40" y1="270" x2="460" y2="270"/><line x1="40" y1="10" x2="40" y2="270"/>
+      <text x="40" y="290">+0 pp</text><text x="250" y="290" text-anchor="middle">+1.5 pp</text><text x="460" y="290" text-anchor="end">+3 pp unemployment</text>
+      <text x="34" y="270" text-anchor="end">0%</text><text x="34" y="140" text-anchor="end">7.5%</text><text x="34" y="14" text-anchor="end">15%</text></g>
+      <polyline points="40.0,264.5 75.0,264.1 110.0,263.7 145.0,263.2 180.0,262.8 215.0,262.4 250.0,261.9 285.0,261.5 320.0,261.1 355.0,260.6 390.0,260.2 425.0,259.8 460.0,259.3" fill="none" stroke="#24545C" stroke-width="2.4"/><text x="466.0" y="263.3" fill="#24545C">Prime</text>
+<polyline points="40.0,248.9 75.0,247.2 110.0,245.5 145.0,243.7 180.0,242.0 215.0,240.3 250.0,238.5 285.0,236.8 320.0,235.1 355.0,233.3 390.0,231.6 425.0,229.9 460.0,228.1" fill="none" stroke="#6E7F3A" stroke-width="2.4"/><text x="466.0" y="232.1" fill="#6E7F3A">Near-prime</text>
+<polyline points="40.0,207.8 75.0,202.6 110.0,197.4 145.0,192.2 180.0,187.0 215.0,181.8 250.0,176.6 285.0,171.4 320.0,166.2 355.0,161.0 390.0,155.8 425.0,150.6 460.0,145.4" fill="none" stroke="#B0661C" stroke-width="2.4"/><text x="466.0" y="149.4" fill="#B0661C">Subprime</text>
+<polyline points="40.0,132.2 75.0,123.5 110.0,114.9 145.0,106.2 180.0,97.5 215.0,88.9 250.0,80.2 285.0,71.5 320.0,62.9 355.0,54.2 390.0,45.5 425.0,36.9 460.0,28.2" fill="none" stroke="#A8201A" stroke-width="2.4"/><text x="466.0" y="32.2" fill="#A8201A">Deep-subprime</text>
+    </svg>
+    <figcaption id="fan-cap">The stress fan, drawn from this pack's own betas: volume-weighted charge-off per credit tier as unemployment rises. Computed by the <code>MACRO_STRESS_SCENARIO</code> SQL table function. Synthetic data.</figcaption>
+  </figure>
+</section>
+
+<section class="facts" aria-label="At a glance">
+  <div><small>No-account mode</small><b>Hosted example</b><span>Runs in the browser on synthetic data</span></div>
+  <div><small>Live setup</small><b>About 15 seconds</b><span>One SQL script on an XSMALL warehouse</span></div>
+  <div><small>Estimated cost</small><b>Under 0.1 credit</b><span>XSMALL warehouse time for setup and a session; Cortex AI calls bill separately</span></div>
+  <div><small>Needs</small><b>Enterprise Edition</b><span>Cortex AI_COMPLETE, Cortex Agents and Cortex Analyst in your region</span></div>
+</section>
+
+<section id="walkthrough">
+  <p class="eyebrow">Walkthrough</p>
+  <h2>From a shock to a committee note in five screens</h2>
+  <div class="shots">
+    <figure class="wide"><img src="images/pulse.jpg" alt="Pulse screen: KPI tiles for volume, approval, delinquency and charge-off under the base-case scenario, a stacked volume chart by credit tier with holiday months shaded, and macro backdrop charts" loading="lazy" width="1440" height="900"><figcaption><b>Pulse.</b> The June 2026 book under the base case (+200 bps, +1 pp). KPI deltas come from the <code>MACRO_STRESS_SCENARIO</code> SQL table function; the volume and macro charts read the <code>MACRO_STRESS_BENCHMARK</code> view.</figcaption></figure>
+    <figure><img src="images/scenario-lab.jpg" alt="Scenario lab under the 2008-style preset: a tier by product grid of charge-off rates with three pools in Breach and two on Watch, and a stress fan chart per tier" loading="lazy" width="1440" height="900"><figcaption><b>Scenario lab.</b> Under a 2008-style +3 pp unemployment shock, three credit pools breach appetite on this synthetic data set. Limits live in <code>MACRO_STRESS_APPETITE</code>; betas in <code>MACRO_STRESS_BETA</code>.</figcaption></figure>
+    <figure><img src="images/pool-drawer.jpg" alt="Pool detail drawer for Deep-subprime BNPL: baseline and scenario values, 24 months of volume with holiday peaks, delinquency and charge-off history, and the tier's sensitivity betas" loading="lazy" width="1440" height="900"><figcaption><b>Pool drawer.</b> Deep-subprime BNPL: 24 months from <code>MACRO_STRESS_BENCHMARK</code>, the tier's betas, and its scenario values.</figcaption></figure>
+    <figure><img src="images/stress-note.jpg" alt="Stress notes screen: a generated committee note with a metrics table and numbered fact citations, labeled as a sample AI response, next to the fact pack it cites" loading="lazy" width="1440" height="900"><figcaption><b>Stress notes.</b> Cortex <code>AI_COMPLETE</code> drafts the note from a numbered fact pack, then a second <code>AI_COMPLETE</code> pass marks it Verified or Needs review. Notes are saved to <code>MACRO_STRESS_REPORTS</code>.</figcaption></figure>
+    <figure><img src="images/ask-agent.jpg" alt="Ask screen: a question about products with zero charge-offs answered by the Cortex Agent with a table of June 2026 volume shares, labeled as a sample AI response" loading="lazy" width="1440" height="900"><figcaption><b>Ask.</b> The Macro Stress Agent (Cortex Agents) answers plain-English questions with Cortex Analyst over the <code>MACRO_STRESS_SV</code> semantic view and shows its SQL.</figcaption></figure>
+    <figure class="phone"><img src="images/phone.jpg" alt="The Pulse screen at phone width: stacked KPI tiles and a scenario bar pinned to the bottom of the screen" loading="lazy" width="390" height="844"><figcaption><b>On a phone.</b> The scenario rail becomes a bottom sheet.</figcaption></figure>
+  </div>
+</section>
+
+<section id="how" class="how">
+  <p class="eyebrow">How it works</p>
+  <h2>Four Snowflake pieces, one governed path</h2>
+  <ol class="ladder">
+    <li><b>Benchmark view</b><span>The portfolio by credit tier, product and month joined to the monthly macro backdrop in <code>MACRO_STRESS_BENCHMARK</code>. Macro columns repeat across pools and are treated as non-additive.</span></li>
+    <li><b>Scenario table function</b><span><code>MACRO_STRESS_SCENARIO(fed_bps, unemp_pp)</code> applies per-tier betas to the latest month and grades each pool against its charge-off limit: Within appetite, Watch or Breach.</span></li>
+    <li><b>Grounded draft + verifier</b><span>Cortex <code>AI_COMPLETE</code> writes the note using only numbered facts and cites each one; a second <code>AI_COMPLETE</code> call checks every claim and flags hedges and forecasts.</span></li>
+    <li><b>Semantic view + Cortex Agent</b><span><code>MACRO_STRESS_SV</code> gives the data business meaning; the Macro Stress Agent answers questions with Cortex Analyst, called from the app through <code>DATA_AGENT_RUN</code>.</span></li>
+  </ol>
+  <p class="chips"><span>Cortex AI_COMPLETE</span><span>Cortex Agents</span><span>Cortex Analyst</span><span>Semantic Views</span><span>SQL table functions</span><span>Streamlit in Snowflake</span></p>
+</section>
+
+<section class="data">
+  <p class="eyebrow">The data</p>
+  <h2>A synthetic book with stories planted on purpose</h2>
+  <ul>
+    <li><b>Holiday peak:</b> book volume goes from $4.94B in October to $6.14B in December 2025; BNPL rises 46%.</li>
+    <li><b>Post-holiday delinquency:</b> 30-day delinquency on credit products climbs from 3.26% to 4.02% in January, and charge-off follows a month later.</li>
+    <li><b>Risk down the tiers:</b> Deep-subprime charge-off moves 2.0 points per +1 pp unemployment, twenty times Prime.</li>
+    <li><b>Appetite breaches:</b> nothing is on Watch at baseline; the 2008-style preset produces 3 breaches and 2 Watch pools.</li>
+    <li><b>The verifier earns its keep:</b> an injected forecast ("Charge-offs will likely double…") is flagged Needs review.</li>
+  </ul>
+  <p>All figures are for this synthetic data set only. A seeded generator (<code>data/generate.py</code>) produces identical data on every run. <code>app/setup.sql</code> keeps the synthetic portfolio but reads real US macro indicators from the free Marketplace Financial Data Package.</p>
+</section>
+
+<section id="run" class="run">
+  <p class="eyebrow">Run it</p>
+  <h2>Three ways in</h2>
+  <div class="cols">
+    <div><h3>1 · No account</h3><p>Open the <a href="try/">hosted example</a>, or run the Streamlit app locally in Sample mode:</p><pre>pip install streamlit pandas altair
+streamlit run app/streamlit_app.py</pre></div>
+    <div><h3>2 · Live in Snowflake</h3><p>Run <code>app/setup_synthetic.sql</code> in a worksheet. Deploy the app as Streamlit in Snowflake with <code>app/deploy_streamlit.sql</code>; it opens in Live mode on your session.</p></div>
+    <div><h3>3 · Adapt it</h3><p>Point <code>MACRO_STRESS_PORTFOLIO_MONTHLY</code> at your own settlement data, tune the betas and limits, and use the Cortex Code prompts in the README.</p></div>
+  </div>
+  <p>Clean up with <code>app/teardown.sql</code>: it drops the database, warehouse and pack role.</p>
+</section>
+
+<section class="disclaimer" role="note">
+  <b>Disclaimer.</b> Halvorn and Quillmar Payments are fictional. This is an illustrative example on synthetic data, provided as-is under the Apache 2.0 license. It is not an official Snowflake product, is not supported by Snowflake Support, and is not production, regulatory, compliance or financial advice. Betas and appetite limits are illustrative, not calibrated.
+</section>
+
+<section class="links">
+  <h2>Learn more</h2>
+  <ul>
+    <li><a href="https://docs.snowflake.com/en/sql-reference/functions/ai_complete">AI_COMPLETE</a></li>
+    <li><a href="https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-agents">Cortex Agents</a> and <a href="https://docs.snowflake.com/en/sql-reference/functions/data_agent_run-snowflake-cortex">DATA_AGENT_RUN</a></li>
+    <li><a href="https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-analyst">Cortex Analyst</a> and <a href="https://docs.snowflake.com/en/user-guide/views-semantic/overview">semantic views</a></li>
+    <li><a href="https://docs.snowflake.com/en/developer-guide/udf/sql/udf-sql-tabular-functions">SQL table functions (UDTFs)</a></li>
+    <li><a href="https://docs.snowflake.com/en/developer-guide/streamlit/about-streamlit">Streamlit in Snowflake</a></li>
+  </ul>
+</section>
+</main>
+<footer>Macro Stress Testing · Owner: Javier Soliz · Last reviewed: November 2026 · <a href="https://github.com/sfc-gh-jsoliz/sfguide-macro-stress-testing">Repository</a> · <a href="https://sfc-gh-ooral.github.io/snow-packs/">Snow Packs</a></footer>
+</body>
+</html>

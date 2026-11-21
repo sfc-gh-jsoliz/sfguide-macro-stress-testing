@@ -1,21 +1,35 @@
 -- ============================================================================
--- Macro Stress Testing — setup_synthetic.sql  (sample mode: no listing needed)
+-- Macro Stress Testing — setup_synthetic.sql  (synthetic macro: no listing needed)
 -- ----------------------------------------------------------------------------
--- Macro Stress Testing for a payments processor's risk & FP&A team: link holiday
--- payment volume and portfolio health (approval, delinquency, charge-off) to the
--- macro backdrop (CPI, unemployment, Fed funds, PCE, consumer sentiment), and run
--- what-if stress sims via per-segment elasticity betas.
+-- Stress-test the payment book of Quillmar Payments (a fictional processor) against
+-- the macro backdrop: CPI, unemployment, Fed funds, PCE and consumer sentiment.
+-- Per-tier elasticity betas drive what-if scenarios such as "+200 bps Fed funds".
 --
--- The processor's own book has no public source, so MACRO_STRESS_PORTFOLIO_MONTHLY
--- is SYNTHETIC in both modes. In sample mode the MACRO side is synthetic too, so nothing external is needed.
--- In real-data mode (setup.sql) the MACRO side is REAL Cybersyn economic indicators (free Financial Data Package).
+-- Everything here is SYNTHETIC: the portfolio and, in this file, the macro indicators.
+-- Run app/setup.sql instead to use REAL macro indicators from the free Marketplace
+-- "Financial Data Package".
+--
+-- Run top to bottom as a role that can create roles (e.g. ACCOUNTADMIN). It creates a
+-- least-privilege pack role, gives it to you, and builds everything as that role.
+-- Cost: XSMALL warehouse for about a minute. AI_COMPLETE and the Cortex Agent bill
+-- Cortex credits only when the app calls them.
 --
 -- Objects in SNOWPACK_MACRO_STRESS.CORE (prefix MACRO_STRESS_):
 --   MACRO_STRESS_SEGMENT, MACRO_STRESS_PRODUCT, MACRO_STRESS_INDICATOR (dims),
 --   MACRO_STRESS_PORTFOLIO_MONTHLY (synthetic fact), MACRO_STRESS_BETA (elasticities),
---   MACRO_STRESS_INDICATORS (TABLE, synthetic here / VIEW in setup.sql), MACRO_STRESS_BENCHMARK (wide view),
+--   MACRO_STRESS_APPETITE (charge-off limits), MACRO_STRESS_INDICATORS (TABLE here),
+--   MACRO_STRESS_BENCHMARK (wide view), MACRO_STRESS_SCENARIO (SQL table function),
 --   MACRO_STRESS_DATA_SOURCE_INFO, MACRO_STRESS_SV, MACRO_STRESS_REPORTS, MACRO_STRESS_AGENT.
 -- ============================================================================
+
+-- 0. Least-privilege pack role ---------------------------------------------------
+USE ROLE ACCOUNTADMIN;
+CREATE ROLE IF NOT EXISTS SNOWPACK_MACRO_STRESS_ROLE COMMENT = 'Macro Stress Testing Snow Pack';
+SET pack_user = CURRENT_USER();
+GRANT ROLE SNOWPACK_MACRO_STRESS_ROLE TO USER IDENTIFIER($pack_user);
+GRANT CREATE DATABASE, CREATE WAREHOUSE ON ACCOUNT TO ROLE SNOWPACK_MACRO_STRESS_ROLE;
+GRANT DATABASE ROLE SNOWFLAKE.CORTEX_USER TO ROLE SNOWPACK_MACRO_STRESS_ROLE;
+USE ROLE SNOWPACK_MACRO_STRESS_ROLE;
 
 -- Isolated environment (dedicated database, schema, and warehouse) --
 CREATE DATABASE IF NOT EXISTS SNOWPACK_MACRO_STRESS;
@@ -26,8 +40,9 @@ USE WAREHOUSE SNOWPACK_MACRO_STRESS_WH;
 USE SCHEMA SNOWPACK_MACRO_STRESS.CORE;
 
 -- Type-switch safety (INDICATORS is a TABLE in synthetic mode, a VIEW in real mode) --
-DROP VIEW  IF EXISTS SNOWPACK_MACRO_STRESS.CORE.MACRO_STRESS_INDICATORS;
-DROP TABLE IF EXISTS SNOWPACK_MACRO_STRESS.CORE.MACRO_STRESS_INDICATORS;
+--    (each DROP errors if the object is the other type, so each is wrapped to ignore that)
+EXECUTE IMMEDIATE $$ BEGIN DROP VIEW IF EXISTS SNOWPACK_MACRO_STRESS.CORE.MACRO_STRESS_INDICATORS; EXCEPTION WHEN OTHER THEN NULL; END; $$;
+EXECUTE IMMEDIATE $$ BEGIN DROP TABLE IF EXISTS SNOWPACK_MACRO_STRESS.CORE.MACRO_STRESS_INDICATORS; EXCEPTION WHEN OTHER THEN NULL; END; $$;
 
 -- 1. Dimensions --------------------------------------------------------------
 CREATE OR REPLACE TABLE MACRO_STRESS_SEGMENT (segment_id INT, credit_tier STRING);
@@ -38,8 +53,7 @@ CREATE OR REPLACE TABLE MACRO_STRESS_PRODUCT (product_id INT, product STRING);
 INSERT INTO MACRO_STRESS_PRODUCT VALUES
   (1,'Credit card'),(2,'Debit'),(3,'Prepaid'),(4,'BNPL');
 
--- Hardcoded macro indicator dim (indicator_key -> name/source/unit + Cybersyn variable).
--- scale_pct=TRUE means the raw Cybersyn value is a fraction (0.04) shown as pct points (4.0).
+-- Macro indicator dim (indicator_key -> name/source/unit + Cybersyn variable used by setup.sql).
 CREATE OR REPLACE TABLE MACRO_STRESS_INDICATOR (
   indicator_key STRING, indicator_name STRING, source STRING, unit STRING,
   cybersyn_variable STRING, scale_pct BOOLEAN
@@ -51,94 +65,565 @@ INSERT INTO MACRO_STRESS_INDICATOR VALUES
   ('PCE','PCE Price Index (SA, 2017=100)','Bureau of Economic Analysis','Index','BEA_NIPA_PCE_RELEASE_DPCERG_M_SA_2017',FALSE),
   ('SENTIMENT','Index of Consumer Sentiment','University of Michigan','Index','the_index_of_consumer_sentiment',FALSE);
 
--- Per-(tier,product) synthetic drivers (deterministic). Debit/Prepaid carry no credit risk.
-CREATE OR REPLACE TEMP TABLE MACRO_STRESS_drivers (
-  segment_id INT, credit_tier STRING, product_id INT, product STRING,
-  base_vol_musd FLOAT, approval_base FLOAT, delinq_base FLOAT, chargeoff_base FLOAT,
-  holiday_lift FLOAT, avg_ticket FLOAT, base_accounts INT
-) AS
-SELECT * FROM VALUES
-  (1,'Prime',1,'Credit card', 900,0.95,0.009,0.003,0.28, 95,220000),
-  (1,'Prime',2,'Debit',       700,0.995,0.000,0.000,0.15, 48,300000),
-  (1,'Prime',3,'Prepaid',      90,0.99,0.000,0.000,0.35, 55, 60000),
-  (1,'Prime',4,'BNPL',        160,0.90,0.012,0.004,0.45,120, 70000),
-  (2,'Near-prime',1,'Credit card',520,0.84,0.026,0.011,0.26, 78,160000),
-  (2,'Near-prime',2,'Debit',      480,0.99,0.000,0.000,0.15, 40,240000),
-  (2,'Near-prime',3,'Prepaid',    140,0.98,0.000,0.000,0.33, 50, 90000),
-  (2,'Near-prime',4,'BNPL',       180,0.80,0.030,0.013,0.46, 95, 95000),
-  (3,'Subprime',1,'Credit card',300,0.64,0.058,0.034,0.24, 62,120000),
-  (3,'Subprime',2,'Debit',      260,0.985,0.000,0.000,0.14, 35,180000),
-  (3,'Subprime',3,'Prepaid',    200,0.975,0.000,0.000,0.34, 46,140000),
-  (3,'Subprime',4,'BNPL',       150,0.62,0.065,0.038,0.47, 80, 90000),
-  (4,'Deep-subprime',1,'Credit card',120,0.46,0.095,0.072,0.22, 52, 70000),
-  (4,'Deep-subprime',2,'Debit',      150,0.98,0.000,0.000,0.13, 32,120000),
-  (4,'Deep-subprime',3,'Prepaid',    170,0.97,0.000,0.000,0.33, 42,130000),
-  (4,'Deep-subprime',4,'BNPL',        70,0.44,0.105,0.080,0.48, 70, 60000)
-  AS d(segment_id, credit_tier, product_id, product, base_vol_musd, approval_base,
-       delinq_base, chargeoff_base, holiday_lift, avg_ticket, base_accounts);
+-- 2. Synthetic portfolio, betas, appetite and macro indicators -------------------
+--    Rows come from data/generate.py (fixed seed), so every run and the hosted
+--    example show the same numbers. Holiday peak Nov-Dec; delinquency up Jan-Feb;
+--    charge-off up Feb-Mar. See data/README.md for the planted stories.
+CREATE OR REPLACE TABLE MACRO_STRESS_PORTFOLIO_MONTHLY (
+  segment_id INT, credit_tier STRING, product_id INT, product STRING, month_end DATE,
+  transaction_volume_usd NUMBER(18,0), txn_count NUMBER(18,0), active_accounts NUMBER(18,0),
+  approval_rate FLOAT, delinquency_rate_30d FLOAT, charge_off_rate FLOAT
+) COMMENT = 'SYNTHETIC: Quillmar Payments book by credit tier, product and month. Replace with your own authorization/settlement data (same columns) to go live.';
 
--- 24 month-ends ending 2026-06-30
-CREATE OR REPLACE TEMP TABLE MACRO_STRESS_months AS
-SELECT LAST_DAY(DATEADD(month, SEQ4(), '2024-07-01')) AS month_end, SEQ4() AS m_idx
-FROM TABLE(GENERATOR(ROWCOUNT => 24));
-
--- 2. Synthetic portfolio fact (holiday peak Nov-Dec; delinquency lags up Jan-Feb) --
-CREATE OR REPLACE TABLE MACRO_STRESS_PORTFOLIO_MONTHLY
-  COMMENT = 'SYNTHETIC: this processor''s payment portfolio by credit tier, product and month. Replace with your own authorization/settlement data (same columns) to go live.'
-AS
-SELECT
-  d.segment_id, d.credit_tier, d.product_id, d.product, m.month_end,
-  ROUND(d.base_vol_musd*1e6 * (1 + 0.004*m.m_idx)
-        * (CASE WHEN MONTH(m.month_end) IN (11,12) THEN 1+d.holiday_lift ELSE 1 END)
-        * (1 + UNIFORM(-25,25,RANDOM(4242))/1000.0), 0)                         AS transaction_volume_usd,
-  ROUND((d.base_vol_musd*1e6 * (1 + 0.004*m.m_idx)
-        * (CASE WHEN MONTH(m.month_end) IN (11,12) THEN 1+d.holiday_lift ELSE 1 END)
-        * (1 + UNIFORM(-25,25,RANDOM(4242))/1000.0)) / NULLIF(d.avg_ticket,0), 0) AS txn_count,
-  ROUND(d.base_accounts * (1 + 0.003*m.m_idx), 0)                                AS active_accounts,
-  LEAST(0.999, GREATEST(0.30, ROUND(d.approval_base + UNIFORM(-15,15,RANDOM(77))/1000.0, 4))) AS approval_rate,
-  ROUND(d.delinq_base    * (CASE WHEN MONTH(m.month_end) IN (1,2) THEN 1.25 ELSE 1 END)
-                         * (1 + UNIFORM(-8,8,RANDOM(88))/100.0), 4)              AS delinquency_rate_30d,
-  ROUND(d.chargeoff_base * (CASE WHEN MONTH(m.month_end) IN (2,3) THEN 1.20 ELSE 1 END)
-                         * (1 + UNIFORM(-8,8,RANDOM(99))/100.0), 4)              AS charge_off_rate
-FROM MACRO_STRESS_drivers d CROSS JOIN MACRO_STRESS_months m;
-
--- 3. Sensitivity betas (elasticities for what-if stress sims; subprime betas larger) --
 CREATE OR REPLACE TABLE MACRO_STRESS_BETA (
   credit_tier STRING, product STRING, portfolio_metric STRING, indicator_key STRING, beta FLOAT, note STRING
-);
-INSERT INTO MACRO_STRESS_BETA VALUES
-  ('Prime','ALL','approval_rate','FED_FUNDS',-0.002,'approval_rate change per +1pp Fed funds'),
-  ('Near-prime','ALL','approval_rate','FED_FUNDS',-0.006,'approval_rate change per +1pp Fed funds'),
-  ('Subprime','ALL','approval_rate','FED_FUNDS',-0.014,'approval_rate change per +1pp Fed funds'),
-  ('Deep-subprime','ALL','approval_rate','FED_FUNDS',-0.022,'approval_rate change per +1pp Fed funds'),
-  ('Prime','ALL','charge_off_rate','UNEMPLOYMENT',0.001,'charge_off_rate change per +1pp unemployment'),
-  ('Near-prime','ALL','charge_off_rate','UNEMPLOYMENT',0.004,'charge_off_rate change per +1pp unemployment'),
-  ('Subprime','ALL','charge_off_rate','UNEMPLOYMENT',0.012,'charge_off_rate change per +1pp unemployment'),
-  ('Deep-subprime','ALL','charge_off_rate','UNEMPLOYMENT',0.020,'charge_off_rate change per +1pp unemployment'),
-  ('Prime','ALL','delinquency_rate_30d','UNEMPLOYMENT',0.002,'30d delinquency change per +1pp unemployment'),
-  ('Near-prime','ALL','delinquency_rate_30d','UNEMPLOYMENT',0.006,'30d delinquency change per +1pp unemployment'),
-  ('Subprime','ALL','delinquency_rate_30d','UNEMPLOYMENT',0.016,'30d delinquency change per +1pp unemployment'),
-  ('Deep-subprime','ALL','delinquency_rate_30d','UNEMPLOYMENT',0.026,'30d delinquency change per +1pp unemployment'),
-  ('Prime','ALL','transaction_volume_usd','SENTIMENT',0.004,'volume pct change per +1pt consumer sentiment'),
-  ('Near-prime','ALL','transaction_volume_usd','SENTIMENT',0.005,'volume pct change per +1pt consumer sentiment'),
-  ('Subprime','ALL','transaction_volume_usd','SENTIMENT',0.006,'volume pct change per +1pt consumer sentiment'),
-  ('Deep-subprime','ALL','transaction_volume_usd','SENTIMENT',0.007,'volume pct change per +1pt consumer sentiment');
+) COMMENT = 'Per-tier elasticities for what-if stress scenarios (synthetic).';
 
--- 4. Macro side -- SYNTHETIC in TRY mode (real Cybersyn view in setup.sql) --
-CREATE OR REPLACE TABLE MACRO_STRESS_INDICATORS
-  COMMENT = 'SYNTHETIC macro indicators. setup.sql replaces this with REAL Cybersyn economic indicators (free Financial Data Package).'
-AS
-SELECT d.indicator_key, d.indicator_name, d.source, d.unit, m.month_end,
-  ROUND(CASE d.indicator_key
-    WHEN 'CPI'          THEN 310 + 0.42*m.m_idx
-    WHEN 'UNEMPLOYMENT' THEN 4.0 + 0.3*ABS(MOD(m.m_idx,6)-3)/3.0
-    WHEN 'FED_FUNDS'    THEN GREATEST(4.3, 5.33 - 0.045*m.m_idx)
-    WHEN 'PCE'          THEN 122 + 0.28*m.m_idx
-    WHEN 'SENTIMENT'    THEN 67 + 3*SIN(m.m_idx/3.0)
-  END, 2) AS indicator_value
-FROM MACRO_STRESS_INDICATOR d CROSS JOIN MACRO_STRESS_months m;
+CREATE OR REPLACE TABLE MACRO_STRESS_APPETITE (
+  credit_tier STRING, charge_off_limit FLOAT, watch_share FLOAT
+) COMMENT = 'Illustrative monthly charge-off risk appetite per credit tier; Watch starts at watch_share of the limit.';
 
--- 5. Benchmark wide view (single pre-joined view for the semantic view) -------
+CREATE OR REPLACE TABLE MACRO_STRESS_INDICATORS (
+  indicator_key STRING, indicator_name STRING, source STRING, unit STRING, month_end DATE, indicator_value FLOAT
+) COMMENT = 'SYNTHETIC macro indicators. setup.sql replaces this with REAL Cybersyn economic indicators (free Financial Data Package).';
+
+-- BEGIN GENERATED DATA
+-- Generated by data/generate.py (seed 4242). Do not edit by hand; re-run the generator.
+
+INSERT INTO MACRO_STRESS_PORTFOLIO_MONTHLY (segment_id, credit_tier, product_id, product, month_end, transaction_volume_usd, txn_count, active_accounts, approval_rate, delinquency_rate_30d, charge_off_rate) VALUES
+  (1, 'Prime', 1, 'Credit card', '2024-07-31', 900900000, 9483158, 220000, 0.939, 0.0083, 0.0031),
+  (1, 'Prime', 1, 'Credit card', '2024-08-31', 902696400, 9502067, 220660, 0.945, 0.009, 0.0029),
+  (1, 'Prime', 1, 'Credit card', '2024-09-30', 913550400, 9616320, 221320, 0.95, 0.0083, 0.0032),
+  (1, 'Prime', 1, 'Credit card', '2024-10-31', 897138000, 9443558, 221980, 0.939, 0.0096, 0.0029),
+  (1, 'Prime', 1, 'Credit card', '2024-11-30', 1142341632, 12024649, 222640, 0.939, 0.0097, 0.0029),
+  (1, 'Prime', 1, 'Credit card', '2024-12-31', 1158589440, 12195678, 223300, 0.945, 0.0085, 0.0029),
+  (1, 'Prime', 1, 'Credit card', '2025-01-31', 940032000, 9895074, 223960, 0.942, 0.0111, 0.0032),
+  (1, 'Prime', 1, 'Credit card', '2025-02-28', 904845600, 9524691, 224620, 0.964, 0.0112, 0.0037),
+  (1, 'Prime', 1, 'Credit card', '2025-03-31', 905580000, 9532421, 225280, 0.945, 0.0087, 0.0039),
+  (1, 'Prime', 1, 'Credit card', '2025-04-30', 928670400, 9775478, 225940, 0.956, 0.0093, 0.0031),
+  (1, 'Prime', 1, 'Credit card', '2025-05-31', 936000000, 9852632, 226600, 0.945, 0.0091, 0.0029),
+  (1, 'Prime', 1, 'Credit card', '2025-06-30', 936781200, 9860855, 227260, 0.954, 0.0096, 0.003),
+  (1, 'Prime', 1, 'Credit card', '2025-07-31', 946029600, 9958206, 227920, 0.937, 0.0096, 0.003),
+  (1, 'Prime', 1, 'Credit card', '2025-08-31', 932598000, 9816821, 228580, 0.954, 0.0087, 0.003),
+  (1, 'Prime', 1, 'Credit card', '2025-09-30', 955152000, 10054232, 229240, 0.943, 0.0085, 0.0029),
+  (1, 'Prime', 1, 'Credit card', '2025-10-31', 974034000, 10252989, 229900, 0.947, 0.0095, 0.0032),
+  (1, 'Prime', 1, 'Credit card', '2025-11-30', 1231856640, 12966912, 230560, 0.942, 0.0096, 0.003),
+  (1, 'Prime', 1, 'Credit card', '2025-12-31', 1206959616, 12704838, 231220, 0.954, 0.0095, 0.0032),
+  (1, 'Prime', 1, 'Credit card', '2026-01-31', 973483200, 10247192, 231880, 0.962, 0.0118, 0.003),
+  (1, 'Prime', 1, 'Credit card', '2026-02-28', 958716000, 10091747, 232540, 0.946, 0.011, 0.0039),
+  (1, 'Prime', 1, 'Credit card', '2026-03-31', 971028000, 10221347, 233200, 0.937, 0.0091, 0.0033),
+  (1, 'Prime', 1, 'Credit card', '2026-04-30', 984380400, 10361899, 233860, 0.941, 0.0085, 0.0032),
+  (1, 'Prime', 1, 'Credit card', '2026-05-31', 954720000, 10049684, 234520, 0.958, 0.0083, 0.0032),
+  (1, 'Prime', 1, 'Credit card', '2026-06-30', 995576400, 10479752, 235180, 0.956, 0.0088, 0.003),
+  (1, 'Prime', 2, 'Debit', '2024-07-31', 713300000, 14860417, 300000, 0.999, 0.0, 0.0),
+  (1, 'Prime', 2, 'Debit', '2024-08-31', 694366400, 14465967, 300900, 0.999, 0.0, 0.0),
+  (1, 'Prime', 2, 'Debit', '2024-09-30', 698544000, 14553000, 301800, 0.985, 0.0, 0.0),
+  (1, 'Prime', 2, 'Debit', '2024-10-31', 690690000, 14389375, 302700, 0.996, 0.0, 0.0),
+  (1, 'Prime', 2, 'Debit', '2024-11-30', 822787280, 17141402, 303600, 0.999, 0.0, 0.0),
+  (1, 'Prime', 2, 'Debit', '2024-12-31', 819457800, 17072037, 304500, 0.999, 0.0, 0.0),
+  (1, 'Prime', 2, 'Debit', '2025-01-31', 723251200, 15067733, 305400, 0.997, 0.0, 0.0),
+  (1, 'Prime', 2, 'Debit', '2025-02-28', 702329600, 14631867, 306300, 0.999, 0.0, 0.0),
+  (1, 'Prime', 2, 'Debit', '2025-03-31', 727456800, 15155350, 307200, 0.994, 0.0, 0.0),
+  (1, 'Prime', 2, 'Debit', '2025-04-30', 717222800, 14942142, 308100, 0.99, 0.0, 0.0),
+  (1, 'Prime', 2, 'Debit', '2025-05-31', 724360000, 15090833, 309000, 0.983, 0.0, 0.0),
+  (1, 'Prime', 2, 'Debit', '2025-06-30', 733723200, 15285900, 309900, 0.999, 0.0, 0.0),
+  (1, 'Prime', 2, 'Debit', '2025-07-31', 727731200, 15161067, 310800, 0.987, 0.0, 0.0),
+  (1, 'Prime', 2, 'Debit', '2025-08-31', 748918800, 15602475, 311700, 0.985, 0.0, 0.0),
+  (1, 'Prime', 2, 'Debit', '2025-09-30', 752505600, 15677200, 312600, 0.982, 0.0, 0.0),
+  (1, 'Prime', 2, 'Debit', '2025-10-31', 750162000, 15628375, 313500, 0.991, 0.0, 0.0),
+  (1, 'Prime', 2, 'Debit', '2025-11-30', 875363440, 18236738, 314400, 0.994, 0.0, 0.0),
+  (1, 'Prime', 2, 'Debit', '2025-12-31', 860599740, 17929161, 315300, 0.986, 0.0, 0.0),
+  (1, 'Prime', 2, 'Debit', '2026-01-31', 757153600, 15774033, 316200, 0.998, 0.0, 0.0),
+  (1, 'Prime', 2, 'Debit', '2026-02-28', 740395600, 15424908, 317100, 0.999, 0.0, 0.0),
+  (1, 'Prime', 2, 'Debit', '2026-03-31', 742392000, 15466500, 318000, 0.999, 0.0, 0.0),
+  (1, 'Prime', 2, 'Debit', '2026-04-30', 764111600, 15918992, 318900, 0.992, 0.0, 0.0),
+  (1, 'Prime', 2, 'Debit', '2026-05-31', 760838400, 15850800, 319800, 0.999, 0.0, 0.0),
+  (1, 'Prime', 2, 'Debit', '2026-06-30', 781981200, 16291275, 320700, 0.999, 0.0, 0.0),
+  (1, 'Prime', 3, 'Prepaid', '2024-07-31', 87840000, 1597091, 60000, 0.999, 0.0, 0.0),
+  (1, 'Prime', 3, 'Prepaid', '2024-08-31', 89998560, 1636337, 60180, 0.999, 0.0, 0.0),
+  (1, 'Prime', 3, 'Prepaid', '2024-09-30', 89359200, 1624713, 60360, 0.999, 0.0, 0.0),
+  (1, 'Prime', 3, 'Prepaid', '2024-10-31', 90624600, 1647720, 60540, 0.999, 0.0, 0.0),
+  (1, 'Prime', 3, 'Prepaid', '2024-11-30', 125542548, 2282592, 60720, 0.982, 0.0, 0.0),
+  (1, 'Prime', 3, 'Prepaid', '2024-12-31', 121575330, 2210461, 60900, 0.984, 0.0, 0.0),
+  (1, 'Prime', 3, 'Prepaid', '2025-01-31', 94371840, 1715852, 61080, 0.999, 0.0, 0.0),
+  (1, 'Prime', 3, 'Prepaid', '2025-02-28', 94185360, 1712461, 61260, 0.984, 0.0, 0.0),
+  (1, 'Prime', 3, 'Prepaid', '2025-03-31', 93158640, 1693793, 61440, 0.999, 0.0, 0.0),
+  (1, 'Prime', 3, 'Prepaid', '2025-04-30', 93426480, 1698663, 61620, 0.998, 0.0, 0.0),
+  (1, 'Prime', 3, 'Prepaid', '2025-05-31', 91634400, 1666080, 61800, 0.999, 0.0, 0.0),
+  (1, 'Prime', 3, 'Prepaid', '2025-06-30', 95463360, 1735697, 61980, 0.978, 0.0, 0.0),
+  (1, 'Prime', 3, 'Prepaid', '2025-07-31', 92716560, 1685756, 62160, 0.994, 0.0, 0.0),
+  (1, 'Prime', 3, 'Prepaid', '2025-08-31', 95721480, 1740391, 62340, 0.999, 0.0, 0.0),
+  (1, 'Prime', 3, 'Prepaid', '2025-09-30', 95135040, 1729728, 62520, 0.987, 0.0, 0.0),
+  (1, 'Prime', 3, 'Prepaid', '2025-10-31', 96163200, 1748422, 62700, 0.976, 0.0, 0.0),
+  (1, 'Prime', 3, 'Prepaid', '2025-11-30', 129793104, 2359875, 62880, 0.999, 0.0, 0.0),
+  (1, 'Prime', 3, 'Prepaid', '2025-12-31', 127685808, 2321560, 63060, 0.989, 0.0, 0.0),
+  (1, 'Prime', 3, 'Prepaid', '2026-01-31', 95611680, 1738394, 63240, 0.983, 0.0, 0.0),
+  (1, 'Prime', 3, 'Prepaid', '2026-02-28', 97033680, 1764249, 63420, 0.984, 0.0, 0.0),
+  (1, 'Prime', 3, 'Prepaid', '2026-03-31', 96228000, 1749600, 63600, 0.983, 0.0, 0.0),
+  (1, 'Prime', 3, 'Prepaid', '2026-04-30', 98730720, 1795104, 63780, 0.99, 0.0, 0.0),
+  (1, 'Prime', 3, 'Prepaid', '2026-05-31', 97528320, 1773242, 63960, 0.975, 0.0, 0.0),
+  (1, 'Prime', 3, 'Prepaid', '2026-06-30', 97297200, 1769040, 64140, 0.986, 0.0, 0.0),
+  (1, 'Prime', 4, 'BNPL', '2024-07-31', 156480000, 1304000, 70000, 0.895, 0.0128, 0.0041),
+  (1, 'Prime', 4, 'BNPL', '2024-08-31', 161603840, 1346699, 70210, 0.895, 0.0115, 0.0039),
+  (1, 'Prime', 4, 'BNPL', '2024-09-30', 164021760, 1366848, 70420, 0.887, 0.012, 0.004),
+  (1, 'Prime', 4, 'BNPL', '2024-10-31', 162405760, 1353381, 70630, 0.885, 0.011, 0.004),
+  (1, 'Prime', 4, 'BNPL', '2024-11-30', 238540544, 1987838, 70840, 0.887, 0.0125, 0.0038),
+  (1, 'Prime', 4, 'BNPL', '2024-12-31', 233327040, 1944392, 71050, 0.893, 0.013, 0.0038),
+  (1, 'Prime', 4, 'BNPL', '2025-01-31', 165642240, 1380352, 71260, 0.906, 0.0145, 0.0038),
+  (1, 'Prime', 4, 'BNPL', '2025-02-28', 161519360, 1345995, 71470, 0.89, 0.015, 0.0052),
+  (1, 'Prime', 4, 'BNPL', '2025-03-31', 163964160, 1366368, 71680, 0.905, 0.011, 0.0045),
+  (1, 'Prime', 4, 'BNPL', '2025-04-30', 167086080, 1392384, 71890, 0.913, 0.0128, 0.0043),
+  (1, 'Prime', 4, 'BNPL', '2025-05-31', 163238400, 1360320, 72100, 0.911, 0.0112, 0.004),
+  (1, 'Prime', 4, 'BNPL', '2025-06-30', 165202560, 1376688, 72310, 0.899, 0.0119, 0.0042),
+  (1, 'Prime', 4, 'BNPL', '2025-07-31', 166338560, 1386155, 72520, 0.897, 0.0121, 0.0038),
+  (1, 'Prime', 4, 'BNPL', '2025-08-31', 169666560, 1413888, 72730, 0.891, 0.0114, 0.004),
+  (1, 'Prime', 4, 'BNPL', '2025-09-30', 169635840, 1413632, 72940, 0.915, 0.0118, 0.0038),
+  (1, 'Prime', 4, 'BNPL', '2025-10-31', 172992000, 1441600, 73150, 0.896, 0.0118, 0.0041),
+  (1, 'Prime', 4, 'BNPL', '2025-11-30', 245860608, 2048838, 73360, 0.915, 0.011, 0.004),
+  (1, 'Prime', 4, 'BNPL', '2025-12-31', 244554912, 2037958, 73570, 0.89, 0.0127, 0.0043),
+  (1, 'Prime', 4, 'BNPL', '2026-01-31', 175293440, 1460779, 73780, 0.89, 0.0153, 0.0041),
+  (1, 'Prime', 4, 'BNPL', '2026-02-28', 168888960, 1407408, 73990, 0.912, 0.0148, 0.0044),
+  (1, 'Prime', 4, 'BNPL', '2026-03-31', 173318400, 1444320, 74200, 0.887, 0.0127, 0.0046),
+  (1, 'Prime', 4, 'BNPL', '2026-04-30', 169104000, 1409200, 74410, 0.904, 0.0124, 0.0042),
+  (1, 'Prime', 4, 'BNPL', '2026-05-31', 173557760, 1446315, 74620, 0.902, 0.011, 0.0042),
+  (1, 'Prime', 4, 'BNPL', '2026-06-30', 172798080, 1439984, 74830, 0.895, 0.0124, 0.004),
+  (2, 'Near-prime', 1, 'Credit card', '2024-07-31', 527800000, 6766667, 160000, 0.838, 0.0257, 0.0117),
+  (2, 'Near-prime', 1, 'Credit card', '2024-08-31', 512682560, 6572853, 160480, 0.844, 0.025, 0.0111),
+  (2, 'Near-prime', 1, 'Credit card', '2024-09-30', 526256640, 6746880, 160960, 0.84, 0.0278, 0.0112),
+  (2, 'Near-prime', 1, 'Credit card', '2024-10-31', 537291040, 6888347, 161440, 0.851, 0.0273, 0.0117),
+  (2, 'Near-prime', 1, 'Credit card', '2024-11-30', 651703853, 8355178, 161920, 0.848, 0.0263, 0.0103),
+  (2, 'Near-prime', 1, 'Credit card', '2024-12-31', 678996864, 8705088, 162400, 0.852, 0.0252, 0.0118),
+  (2, 'Near-prime', 1, 'Credit card', '2025-01-31', 533012480, 6833493, 162880, 0.845, 0.0351, 0.011),
+  (2, 'Near-prime', 1, 'Credit card', '2025-02-28', 540974720, 6935573, 163360, 0.85, 0.0302, 0.0136),
+  (2, 'Near-prime', 1, 'Credit card', '2025-03-31', 543616320, 6969440, 163840, 0.828, 0.025, 0.0136),
+  (2, 'Near-prime', 1, 'Credit card', '2025-04-30', 552188000, 7079333, 164320, 0.84, 0.0257, 0.0117),
+  (2, 'Near-prime', 1, 'Credit card', '2025-05-31', 536473600, 6877867, 164800, 0.853, 0.0273, 0.0118),
+  (2, 'Near-prime', 1, 'Credit card', '2025-06-30', 533108160, 6834720, 165280, 0.844, 0.0247, 0.011),
+  (2, 'Near-prime', 1, 'Credit card', '2025-07-31', 531880960, 6818987, 165760, 0.834, 0.027, 0.0115),
+  (2, 'Near-prime', 1, 'Credit card', '2025-08-31', 560168960, 7181653, 166240, 0.833, 0.0263, 0.0113),
+  (2, 'Near-prime', 1, 'Credit card', '2025-09-30', 553512960, 7096320, 166720, 0.84, 0.0255, 0.0117),
+  (2, 'Near-prime', 1, 'Credit card', '2025-10-31', 564980000, 7243333, 167200, 0.846, 0.0247, 0.0102),
+  (2, 'Near-prime', 1, 'Credit card', '2025-11-30', 697132800, 8937600, 167680, 0.846, 0.0239, 0.0103),
+  (2, 'Near-prime', 1, 'Credit card', '2025-12-31', 713748672, 9150624, 168160, 0.844, 0.0242, 0.0118),
+  (2, 'Near-prime', 1, 'Credit card', '2026-01-31', 568588800, 7289600, 168640, 0.831, 0.0335, 0.0109),
+  (2, 'Near-prime', 1, 'Credit card', '2026-02-28', 551127200, 7065733, 169120, 0.85, 0.0341, 0.0124),
+  (2, 'Near-prime', 1, 'Credit card', '2026-03-31', 555984000, 7128000, 169600, 0.855, 0.0242, 0.0128),
+  (2, 'Near-prime', 1, 'Credit card', '2026-04-30', 561988960, 7204987, 170080, 0.838, 0.026, 0.0119),
+  (2, 'Near-prime', 1, 'Credit card', '2026-05-31', 562931200, 7217067, 170560, 0.847, 0.0281, 0.0103),
+  (2, 'Near-prime', 1, 'Credit card', '2026-06-30', 563297280, 7221760, 171040, 0.84, 0.0257, 0.0119),
+  (2, 'Near-prime', 2, 'Debit', '2024-07-31', 480480000, 12012000, 240000, 0.976, 0.0, 0.0),
+  (2, 'Near-prime', 2, 'Debit', '2024-08-31', 488666880, 12216672, 240720, 0.986, 0.0, 0.0),
+  (2, 'Near-prime', 2, 'Debit', '2024-09-30', 479969280, 11999232, 241440, 0.995, 0.0, 0.0),
+  (2, 'Near-prime', 2, 'Debit', '2024-10-31', 484788480, 12119712, 242160, 0.98, 0.0, 0.0),
+  (2, 'Near-prime', 2, 'Debit', '2024-11-30', 561392832, 14034821, 242880, 0.98, 0.0, 0.0),
+  (2, 'Near-prime', 2, 'Debit', '2024-12-31', 552342240, 13808556, 243600, 0.999, 0.0, 0.0),
+  (2, 'Near-prime', 2, 'Debit', '2025-01-31', 502333440, 12558336, 244320, 0.999, 0.0, 0.0),
+  (2, 'Near-prime', 2, 'Debit', '2025-02-28', 488999040, 12224976, 245040, 0.977, 0.0, 0.0),
+  (2, 'Near-prime', 2, 'Debit', '2025-03-31', 487434240, 12185856, 245760, 0.999, 0.0, 0.0),
+  (2, 'Near-prime', 2, 'Debit', '2025-04-30', 490318080, 12257952, 246480, 0.996, 0.0, 0.0),
+  (2, 'Near-prime', 2, 'Debit', '2025-05-31', 488217600, 12205440, 247200, 0.992, 0.0, 0.0),
+  (2, 'Near-prime', 2, 'Debit', '2025-06-30', 509137920, 12728448, 247920, 0.999, 0.0, 0.0),
+  (2, 'Near-prime', 2, 'Debit', '2025-07-31', 507567360, 12689184, 248640, 0.997, 0.0, 0.0),
+  (2, 'Near-prime', 2, 'Debit', '2025-08-31', 495870720, 12396768, 249360, 0.983, 0.0, 0.0),
+  (2, 'Near-prime', 2, 'Debit', '2025-09-30', 507386880, 12684672, 250080, 0.985, 0.0, 0.0),
+  (2, 'Near-prime', 2, 'Debit', '2025-10-31', 520502400, 13012560, 250800, 0.976, 0.0, 0.0),
+  (2, 'Near-prime', 2, 'Debit', '2025-11-30', 595550592, 14888765, 251520, 0.991, 0.0, 0.0),
+  (2, 'Near-prime', 2, 'Debit', '2025-12-31', 578334816, 14458370, 252240, 0.975, 0.0, 0.0),
+  (2, 'Near-prime', 2, 'Debit', '2026-01-31', 510443520, 12761088, 252960, 0.978, 0.0, 0.0),
+  (2, 'Near-prime', 2, 'Debit', '2026-02-28', 507183360, 12679584, 253680, 0.988, 0.0, 0.0),
+  (2, 'Near-prime', 2, 'Debit', '2026-03-31', 513216000, 12830400, 254400, 0.999, 0.0, 0.0),
+  (2, 'Near-prime', 2, 'Debit', '2026-04-30', 530206080, 13255152, 255120, 0.999, 0.0, 0.0),
+  (2, 'Near-prime', 2, 'Debit', '2026-05-31', 523284480, 13082112, 255840, 0.975, 0.0, 0.0),
+  (2, 'Near-prime', 2, 'Debit', '2026-06-30', 511580160, 12789504, 256560, 0.999, 0.0, 0.0),
+  (2, 'Near-prime', 3, 'Prepaid', '2024-07-31', 137620000, 2752400, 90000, 0.984, 0.0, 0.0),
+  (2, 'Near-prime', 3, 'Prepaid', '2024-08-31', 141684480, 2833690, 90270, 0.975, 0.0, 0.0),
+  (2, 'Near-prime', 3, 'Prepaid', '2024-09-30', 137874240, 2757485, 90540, 0.974, 0.0, 0.0),
+  (2, 'Near-prime', 3, 'Prepaid', '2024-10-31', 138279680, 2765594, 90810, 0.969, 0.0, 0.0),
+  (2, 'Near-prime', 3, 'Prepaid', '2024-11-30', 186341512, 3726830, 91080, 0.979, 0.0, 0.0),
+  (2, 'Near-prime', 3, 'Prepaid', '2024-12-31', 194102328, 3882047, 91350, 0.966, 0.0, 0.0),
+  (2, 'Near-prime', 3, 'Prepaid', '2025-01-31', 140206080, 2804122, 91620, 0.99, 0.0, 0.0),
+  (2, 'Near-prime', 3, 'Prepaid', '2025-02-28', 146078800, 2921576, 91890, 0.99, 0.0, 0.0),
+  (2, 'Near-prime', 3, 'Prepaid', '2025-03-31', 147369600, 2947392, 92160, 0.968, 0.0, 0.0),
+  (2, 'Near-prime', 3, 'Prepaid', '2025-04-30', 144459840, 2889197, 92430, 0.986, 0.0, 0.0),
+  (2, 'Near-prime', 3, 'Prepaid', '2025-05-31', 144435200, 2888704, 92700, 0.994, 0.0, 0.0),
+  (2, 'Near-prime', 3, 'Prepaid', '2025-06-30', 148644720, 2972894, 92970, 0.981, 0.0, 0.0),
+  (2, 'Near-prime', 3, 'Prepaid', '2025-07-31', 143198720, 2863974, 93240, 0.976, 0.0, 0.0),
+  (2, 'Near-prime', 3, 'Prepaid', '2025-08-31', 148752800, 2975056, 93510, 0.966, 0.0, 0.0),
+  (2, 'Near-prime', 3, 'Prepaid', '2025-09-30', 145622400, 2912448, 93780, 0.991, 0.0, 0.0),
+  (2, 'Near-prime', 3, 'Prepaid', '2025-10-31', 147954800, 2959096, 94050, 0.983, 0.0, 0.0),
+  (2, 'Near-prime', 3, 'Prepaid', '2025-11-30', 194352581, 3887052, 94320, 0.966, 0.0, 0.0),
+  (2, 'Near-prime', 3, 'Prepaid', '2025-12-31', 196077538, 3921551, 94590, 0.98, 0.0, 0.0),
+  (2, 'Near-prime', 3, 'Prepaid', '2026-01-31', 148429120, 2968582, 94860, 0.975, 0.0, 0.0),
+  (2, 'Near-prime', 3, 'Prepaid', '2026-02-28', 150188080, 3003762, 95130, 0.978, 0.0, 0.0),
+  (2, 'Near-prime', 3, 'Prepaid', '2026-03-31', 150141600, 3002832, 95400, 0.966, 0.0, 0.0),
+  (2, 'Near-prime', 3, 'Prepaid', '2026-04-30', 150697680, 3013954, 95670, 0.986, 0.0, 0.0),
+  (2, 'Near-prime', 3, 'Prepaid', '2026-05-31', 151406080, 3028122, 95940, 0.988, 0.0, 0.0),
+  (2, 'Near-prime', 3, 'Prepaid', '2026-06-30', 152880000, 3057600, 96210, 0.987, 0.0, 0.0),
+  (2, 'Near-prime', 4, 'BNPL', '2024-07-31', 183780000, 1934526, 95000, 0.791, 0.0306, 0.0131),
+  (2, 'Near-prime', 4, 'BNPL', '2024-08-31', 182527200, 1921339, 95285, 0.81, 0.0318, 0.0122),
+  (2, 'Near-prime', 4, 'BNPL', '2024-09-30', 179988480, 1894616, 95570, 0.804, 0.0309, 0.0138),
+  (2, 'Near-prime', 4, 'BNPL', '2024-10-31', 182160000, 1917474, 95855, 0.811, 0.0315, 0.0135),
+  (2, 'Near-prime', 4, 'BNPL', '2024-11-30', 271543882, 2858357, 96140, 0.811, 0.0309, 0.013),
+  (2, 'Near-prime', 4, 'BNPL', '2024-12-31', 272076840, 2863967, 96425, 0.811, 0.0282, 0.012),
+  (2, 'Near-prime', 4, 'BNPL', '2025-01-31', 186900480, 1967373, 96710, 0.788, 0.0371, 0.014),
+  (2, 'Near-prime', 4, 'BNPL', '2025-02-28', 181154160, 1906886, 96995, 0.797, 0.0356, 0.0145),
+  (2, 'Near-prime', 4, 'BNPL', '2025-03-31', 187060320, 1969056, 97280, 0.814, 0.0276, 0.0167),
+  (2, 'Near-prime', 4, 'BNPL', '2025-04-30', 181818000, 1913874, 97565, 0.814, 0.0288, 0.012),
+  (2, 'Near-prime', 4, 'BNPL', '2025-05-31', 191692800, 2017819, 97850, 0.789, 0.0276, 0.0127),
+  (2, 'Near-prime', 4, 'BNPL', '2025-06-30', 186792480, 1966237, 98135, 0.794, 0.0321, 0.012),
+  (2, 'Near-prime', 4, 'BNPL', '2025-07-31', 188451360, 1983699, 98420, 0.791, 0.0276, 0.0137),
+  (2, 'Near-prime', 4, 'BNPL', '2025-08-31', 188223840, 1981304, 98705, 0.811, 0.0315, 0.0139),
+  (2, 'Near-prime', 4, 'BNPL', '2025-09-30', 188369280, 1982835, 98990, 0.794, 0.0324, 0.0133),
+  (2, 'Near-prime', 4, 'BNPL', '2025-10-31', 191944800, 2020472, 99275, 0.804, 0.0297, 0.012),
+  (2, 'Near-prime', 4, 'BNPL', '2025-11-30', 276823008, 2913926, 99560, 0.803, 0.0309, 0.0121),
+  (2, 'Near-prime', 4, 'BNPL', '2025-12-31', 280951070, 2957380, 99845, 0.799, 0.0297, 0.0125),
+  (2, 'Near-prime', 4, 'BNPL', '2026-01-31', 193924800, 2041314, 100130, 0.786, 0.0401, 0.0129),
+  (2, 'Near-prime', 4, 'BNPL', '2026-02-28', 195616800, 2059124, 100415, 0.807, 0.0349, 0.015),
+  (2, 'Near-prime', 4, 'BNPL', '2026-03-31', 191289600, 2013575, 100700, 0.795, 0.0294, 0.0147),
+  (2, 'Near-prime', 4, 'BNPL', '2026-04-30', 196876080, 2072380, 100985, 0.791, 0.0324, 0.0122),
+  (2, 'Near-prime', 4, 'BNPL', '2026-05-31', 194860800, 2051166, 101270, 0.807, 0.0303, 0.0131),
+  (2, 'Near-prime', 4, 'BNPL', '2026-06-30', 198918720, 2093881, 101555, 0.803, 0.0297, 0.0129),
+  (3, 'Subprime', 1, 'Credit card', '2024-07-31', 292500000, 4717742, 120000, 0.627, 0.0568, 0.033),
+  (3, 'Subprime', 1, 'Credit card', '2024-08-31', 294874800, 4756045, 120360, 0.649, 0.0621, 0.032),
+  (3, 'Subprime', 1, 'Credit card', '2024-09-30', 301795200, 4867665, 120720, 0.652, 0.0545, 0.0323),
+  (3, 'Subprime', 1, 'Credit card', '2024-10-31', 310279200, 5004503, 121080, 0.635, 0.0534, 0.0316),
+  (3, 'Subprime', 1, 'Credit card', '2024-11-30', 372660672, 6010656, 121440, 0.651, 0.0609, 0.0347),
+  (3, 'Subprime', 1, 'Credit card', '2024-12-31', 371851200, 5997600, 121800, 0.627, 0.0539, 0.0343),
+  (3, 'Subprime', 1, 'Credit card', '2025-01-31', 311193600, 5019252, 122160, 0.625, 0.0682, 0.0337),
+  (3, 'Subprime', 1, 'Credit card', '2025-02-28', 308400000, 4974194, 122520, 0.641, 0.0689, 0.0375),
+  (3, 'Subprime', 1, 'Credit card', '2025-03-31', 312386400, 5038490, 122880, 0.638, 0.0563, 0.0441),
+  (3, 'Subprime', 1, 'Credit card', '2025-04-30', 310800000, 5012903, 123240, 0.643, 0.0586, 0.034),
+  (3, 'Subprime', 1, 'Credit card', '2025-05-31', 316056000, 5097677, 123600, 0.649, 0.0557, 0.035),
+  (3, 'Subprime', 1, 'Credit card', '2025-06-30', 310694400, 5011200, 123960, 0.65, 0.0563, 0.0343),
+  (3, 'Subprime', 1, 'Credit card', '2025-07-31', 319744800, 5157174, 124320, 0.635, 0.0586, 0.0326),
+  (3, 'Subprime', 1, 'Credit card', '2025-08-31', 316546800, 5105594, 124680, 0.632, 0.0597, 0.035),
+  (3, 'Subprime', 1, 'Credit card', '2025-09-30', 317750400, 5125006, 125040, 0.65, 0.0586, 0.0333),
+  (3, 'Subprime', 1, 'Credit card', '2025-10-31', 322452000, 5200839, 125400, 0.646, 0.0603, 0.0354),
+  (3, 'Subprime', 1, 'Credit card', '2025-11-30', 404911584, 6530832, 125760, 0.628, 0.0615, 0.032),
+  (3, 'Subprime', 1, 'Credit card', '2025-12-31', 402460848, 6491304, 126120, 0.65, 0.0615, 0.0367),
+  (3, 'Subprime', 1, 'Credit card', '2026-01-31', 321278400, 5181910, 126480, 0.645, 0.0783, 0.0364),
+  (3, 'Subprime', 1, 'Credit card', '2026-02-28', 324414000, 5232484, 126840, 0.629, 0.0711, 0.0379),
+  (3, 'Subprime', 1, 'Credit card', '2026-03-31', 328536000, 5298968, 127200, 0.63, 0.0626, 0.0392),
+  (3, 'Subprime', 1, 'Credit card', '2026-04-30', 319671600, 5155994, 127560, 0.626, 0.0534, 0.033),
+  (3, 'Subprime', 1, 'Credit card', '2026-05-31', 318240000, 5132903, 127920, 0.643, 0.0603, 0.033),
+  (3, 'Subprime', 1, 'Credit card', '2026-06-30', 326944800, 5273303, 128280, 0.64, 0.058, 0.0337),
+  (3, 'Subprime', 2, 'Debit', '2024-07-31', 264160000, 7547429, 180000, 0.973, 0.0, 0.0),
+  (3, 'Subprime', 2, 'Debit', '2024-08-31', 261301040, 7465744, 180540, 0.985, 0.0, 0.0),
+  (3, 'Subprime', 2, 'Debit', '2024-09-30', 260769600, 7450560, 181080, 0.975, 0.0, 0.0),
+  (3, 'Subprime', 2, 'Debit', '2024-10-31', 260225680, 7435019, 181620, 0.994, 0.0, 0.0),
+  (3, 'Subprime', 2, 'Debit', '2024-11-30', 298130976, 8518028, 182160, 0.986, 0.0, 0.0),
+  (3, 'Subprime', 2, 'Debit', '2024-12-31', 300816360, 8594753, 182700, 0.999, 0.0, 0.0),
+  (3, 'Subprime', 2, 'Debit', '2025-01-31', 262512640, 7500361, 183240, 0.993, 0.0, 0.0),
+  (3, 'Subprime', 2, 'Debit', '2025-02-28', 270487360, 7728210, 183780, 0.977, 0.0, 0.0),
+  (3, 'Subprime', 2, 'Debit', '2025-03-31', 273686400, 7819611, 184320, 0.981, 0.0, 0.0),
+  (3, 'Subprime', 2, 'Debit', '2025-04-30', 262626000, 7503600, 184860, 0.971, 0.0, 0.0),
+  (3, 'Subprime', 2, 'Debit', '2025-05-31', 268236800, 7663909, 185400, 0.985, 0.0, 0.0),
+  (3, 'Subprime', 2, 'Debit', '2025-06-30', 276054480, 7887271, 185940, 0.986, 0.0, 0.0),
+  (3, 'Subprime', 2, 'Debit', '2025-07-31', 278474560, 7956416, 186480, 0.994, 0.0, 0.0),
+  (3, 'Subprime', 2, 'Debit', '2025-08-31', 277075760, 7916450, 187020, 0.993, 0.0, 0.0),
+  (3, 'Subprime', 2, 'Debit', '2025-09-30', 275383680, 7868105, 187560, 0.981, 0.0, 0.0),
+  (3, 'Subprime', 2, 'Debit', '2025-10-31', 280836400, 8023897, 188100, 0.985, 0.0, 0.0),
+  (3, 'Subprime', 2, 'Debit', '2025-11-30', 317892557, 9082644, 188640, 0.998, 0.0, 0.0),
+  (3, 'Subprime', 2, 'Debit', '2025-12-31', 318771086, 9107745, 189180, 0.998, 0.0, 0.0),
+  (3, 'Subprime', 2, 'Debit', '2026-01-31', 281507200, 8043063, 189720, 0.995, 0.0, 0.0),
+  (3, 'Subprime', 2, 'Debit', '2026-02-28', 283396880, 8097054, 190260, 0.984, 0.0, 0.0),
+  (3, 'Subprime', 2, 'Debit', '2026-03-31', 287820000, 8223429, 190800, 0.973, 0.0, 0.0),
+  (3, 'Subprime', 2, 'Debit', '2026-04-30', 280712640, 8020361, 191340, 0.974, 0.0, 0.0),
+  (3, 'Subprime', 2, 'Debit', '2026-05-31', 278919680, 7969134, 191880, 0.987, 0.0, 0.0),
+  (3, 'Subprime', 2, 'Debit', '2026-06-30', 281648640, 8047104, 192420, 0.983, 0.0, 0.0),
+  (3, 'Subprime', 3, 'Prepaid', '2024-07-31', 195800000, 4256522, 140000, 0.984, 0.0, 0.0),
+  (3, 'Subprime', 3, 'Prepaid', '2024-08-31', 199796000, 4343391, 140420, 0.98, 0.0, 0.0),
+  (3, 'Subprime', 3, 'Prepaid', '2024-09-30', 203011200, 4413287, 140840, 0.962, 0.0, 0.0),
+  (3, 'Subprime', 3, 'Prepaid', '2024-10-31', 200376000, 4356000, 141260, 0.972, 0.0, 0.0),
+  (3, 'Subprime', 3, 'Prepaid', '2024-11-30', 275827744, 5996255, 141680, 0.971, 0.0, 0.0),
+  (3, 'Subprime', 3, 'Prepaid', '2024-12-31', 268166160, 5829699, 142100, 0.979, 0.0, 0.0),
+  (3, 'Subprime', 3, 'Prepaid', '2025-01-31', 200499200, 4358678, 142520, 0.983, 0.0, 0.0),
+  (3, 'Subprime', 3, 'Prepaid', '2025-02-28', 209917600, 4563426, 142940, 0.975, 0.0, 0.0),
+  (3, 'Subprime', 3, 'Prepaid', '2025-03-31', 209496000, 4554261, 143360, 0.968, 0.0, 0.0),
+  (3, 'Subprime', 3, 'Prepaid', '2025-04-30', 202848800, 4409757, 143780, 0.985, 0.0, 0.0),
+  (3, 'Subprime', 3, 'Prepaid', '2025-05-31', 207168000, 4503652, 144200, 0.972, 0.0, 0.0),
+  (3, 'Subprime', 3, 'Prepaid', '2025-06-30', 210888000, 4584522, 144620, 0.981, 0.0, 0.0),
+  (3, 'Subprime', 3, 'Prepaid', '2025-07-31', 209390400, 4551965, 145040, 0.968, 0.0, 0.0),
+  (3, 'Subprime', 3, 'Prepaid', '2025-08-31', 211872800, 4605930, 145460, 0.975, 0.0, 0.0),
+  (3, 'Subprime', 3, 'Prepaid', '2025-09-30', 215212800, 4678539, 145880, 0.962, 0.0, 0.0),
+  (3, 'Subprime', 3, 'Prepaid', '2025-10-31', 212424000, 4617913, 146300, 0.967, 0.0, 0.0),
+  (3, 'Subprime', 3, 'Prepaid', '2025-11-30', 285722304, 6211354, 146720, 0.98, 0.0, 0.0),
+  (3, 'Subprime', 3, 'Prepaid', '2025-12-31', 290231136, 6309373, 147140, 0.96, 0.0, 0.0),
+  (3, 'Subprime', 3, 'Prepaid', '2026-01-31', 217187200, 4721461, 147560, 0.963, 0.0, 0.0),
+  (3, 'Subprime', 3, 'Prepaid', '2026-02-28', 214984800, 4673583, 147980, 0.961, 0.0, 0.0),
+  (3, 'Subprime', 3, 'Prepaid', '2026-03-31', 214704000, 4667478, 148400, 0.975, 0.0, 0.0),
+  (3, 'Subprime', 3, 'Prepaid', '2026-04-30', 214632000, 4665913, 148820, 0.969, 0.0, 0.0),
+  (3, 'Subprime', 3, 'Prepaid', '2026-05-31', 221299200, 4810852, 149240, 0.965, 0.0, 0.0),
+  (3, 'Subprime', 3, 'Prepaid', '2026-06-30', 221676000, 4819043, 149660, 0.961, 0.0, 0.0),
+  (3, 'Subprime', 4, 'BNPL', '2024-07-31', 152850000, 1910625, 90000, 0.612, 0.0617, 0.041),
+  (3, 'Subprime', 4, 'BNPL', '2024-08-31', 147286800, 1841085, 90270, 0.619, 0.0624, 0.0365),
+  (3, 'Subprime', 4, 'BNPL', '2024-09-30', 152560800, 1907010, 90540, 0.618, 0.0683, 0.0376),
+  (3, 'Subprime', 4, 'BNPL', '2024-10-31', 148005000, 1850062, 90810, 0.627, 0.0617, 0.0399),
+  (3, 'Subprime', 4, 'BNPL', '2024-11-30', 226716336, 2833954, 91080, 0.616, 0.0617, 0.0357),
+  (3, 'Subprime', 4, 'BNPL', '2024-12-31', 228958380, 2861980, 91350, 0.613, 0.0598, 0.0403),
+  (3, 'Subprime', 4, 'BNPL', '2025-01-31', 151449600, 1893120, 91620, 0.627, 0.0821, 0.0407),
+  (3, 'Subprime', 4, 'BNPL', '2025-02-28', 152503800, 1906298, 91890, 0.625, 0.0764, 0.0429),
+  (3, 'Subprime', 4, 'BNPL', '2025-03-31', 157276800, 1965960, 92160, 0.609, 0.0657, 0.0433),
+  (3, 'Subprime', 4, 'BNPL', '2025-04-30', 153690600, 1921132, 92430, 0.624, 0.0624, 0.0353),
+  (3, 'Subprime', 4, 'BNPL', '2025-05-31', 156624000, 1957800, 92700, 0.634, 0.0637, 0.0384),
+  (3, 'Subprime', 4, 'BNPL', '2025-06-30', 157069800, 1963372, 92970, 0.627, 0.0676, 0.0369),
+  (3, 'Subprime', 4, 'BNPL', '2025-07-31', 157042800, 1963035, 93240, 0.621, 0.0696, 0.0365),
+  (3, 'Subprime', 4, 'BNPL', '2025-08-31', 158746800, 1984335, 93510, 0.632, 0.0657, 0.041),
+  (3, 'Subprime', 4, 'BNPL', '2025-09-30', 156340800, 1954260, 93780, 0.634, 0.0676, 0.0399),
+  (3, 'Subprime', 4, 'BNPL', '2025-10-31', 159000000, 1987500, 94050, 0.628, 0.0617, 0.035),
+  (3, 'Subprime', 4, 'BNPL', '2025-11-30', 237427344, 2967842, 94320, 0.633, 0.065, 0.0403),
+  (3, 'Subprime', 4, 'BNPL', '2025-12-31', 239261904, 2990774, 94590, 0.615, 0.0683, 0.0384),
+  (3, 'Subprime', 4, 'BNPL', '2026-01-31', 156780000, 1959750, 94860, 0.613, 0.0853, 0.0395),
+  (3, 'Subprime', 4, 'BNPL', '2026-02-28', 159140400, 1989255, 95130, 0.617, 0.0804, 0.0479),
+  (3, 'Subprime', 4, 'BNPL', '2026-03-31', 159732000, 1996650, 95400, 0.618, 0.0696, 0.042),
+  (3, 'Subprime', 4, 'BNPL', '2026-04-30', 160648800, 2008110, 95670, 0.632, 0.0617, 0.0361),
+  (3, 'Subprime', 4, 'BNPL', '2026-05-31', 164995200, 2062440, 95940, 0.627, 0.0657, 0.0372),
+  (3, 'Subprime', 4, 'BNPL', '2026-06-30', 164619000, 2057737, 96210, 0.607, 0.0617, 0.0403),
+  (4, 'Deep-subprime', 1, 'Credit card', '2024-07-31', 117120000, 2252308, 70000, 0.451, 0.0902, 0.0698),
+  (4, 'Deep-subprime', 1, 'Credit card', '2024-08-31', 119034240, 2289120, 70210, 0.452, 0.0912, 0.0778),
+  (4, 'Deep-subprime', 1, 'Credit card', '2024-09-30', 118177920, 2272652, 70420, 0.455, 0.0921, 0.0778),
+  (4, 'Deep-subprime', 1, 'Credit card', '2024-10-31', 121197120, 2330714, 70630, 0.463, 0.1017, 0.0756),
+  (4, 'Deep-subprime', 1, 'Credit card', '2024-11-30', 146957491, 2826106, 70840, 0.472, 0.0998, 0.0778),
+  (4, 'Deep-subprime', 1, 'Credit card', '2024-12-31', 146789424, 2822874, 71050, 0.449, 0.095, 0.0763),
+  (4, 'Deep-subprime', 1, 'Credit card', '2025-01-31', 120545280, 2318178, 71260, 0.467, 0.114, 0.0763),
+  (4, 'Deep-subprime', 1, 'Credit card', '2025-02-28', 121756320, 2341468, 71470, 0.465, 0.1271, 0.0924),
+  (4, 'Deep-subprime', 1, 'Credit card', '2025-03-31', 126316800, 2429169, 71680, 0.449, 0.0874, 0.0829),
+  (4, 'Deep-subprime', 1, 'Credit card', '2025-04-30', 124568640, 2395551, 71890, 0.455, 0.0921, 0.0698),
+  (4, 'Deep-subprime', 1, 'Credit card', '2025-05-31', 122678400, 2359200, 72100, 0.468, 0.0902, 0.067),
+  (4, 'Deep-subprime', 1, 'Credit card', '2025-06-30', 124653600, 2397185, 72310, 0.463, 0.0931, 0.0727),
+  (4, 'Deep-subprime', 1, 'Credit card', '2025-07-31', 123244800, 2370092, 72520, 0.455, 0.0979, 0.0698),
+  (4, 'Deep-subprime', 1, 'Credit card', '2025-08-31', 126113760, 2425265, 72730, 0.445, 0.0874, 0.0713),
+  (4, 'Deep-subprime', 1, 'Credit card', '2025-09-30', 125452800, 2412554, 72940, 0.459, 0.0988, 0.0778),
+  (4, 'Deep-subprime', 1, 'Credit card', '2025-10-31', 129616800, 2492631, 73150, 0.473, 0.1026, 0.0763),
+  (4, 'Deep-subprime', 1, 'Credit card', '2025-11-30', 155925370, 2998565, 73360, 0.474, 0.0969, 0.0677),
+  (4, 'Deep-subprime', 1, 'Credit card', '2025-12-31', 152759030, 2937674, 73570, 0.448, 0.1017, 0.072),
+  (4, 'Deep-subprime', 1, 'Credit card', '2026-01-31', 129283200, 2486215, 73780, 0.471, 0.1152, 0.0684),
+  (4, 'Deep-subprime', 1, 'Credit card', '2026-02-28', 127183200, 2445831, 73990, 0.468, 0.1128, 0.0933),
+  (4, 'Deep-subprime', 1, 'Credit card', '2026-03-31', 128692800, 2474862, 74200, 0.46, 0.0912, 0.0873),
+  (4, 'Deep-subprime', 1, 'Credit card', '2026-04-30', 127088160, 2444003, 74410, 0.446, 0.0969, 0.0698),
+  (4, 'Deep-subprime', 1, 'Credit card', '2026-05-31', 132126720, 2540898, 74620, 0.447, 0.1026, 0.0756),
+  (4, 'Deep-subprime', 1, 'Credit card', '2026-06-30', 128157120, 2464560, 74830, 0.457, 0.0931, 0.0763),
+  (4, 'Deep-subprime', 2, 'Debit', '2024-07-31', 148500000, 4640625, 120000, 0.993, 0.0, 0.0),
+  (4, 'Deep-subprime', 2, 'Debit', '2024-08-31', 149997600, 4687425, 120360, 0.977, 0.0, 0.0),
+  (4, 'Deep-subprime', 2, 'Debit', '2024-09-30', 153921600, 4810050, 120720, 0.965, 0.0, 0.0),
+  (4, 'Deep-subprime', 2, 'Debit', '2024-10-31', 152255400, 4757981, 121080, 0.984, 0.0, 0.0),
+  (4, 'Deep-subprime', 2, 'Debit', '2024-11-30', 172728636, 5397770, 121440, 0.977, 0.0, 0.0),
+  (4, 'Deep-subprime', 2, 'Debit', '2024-12-31', 172544220, 5392007, 121800, 0.965, 0.0, 0.0),
+  (4, 'Deep-subprime', 2, 'Debit', '2025-01-31', 155289600, 4852800, 122160, 0.993, 0.0, 0.0),
+  (4, 'Deep-subprime', 2, 'Debit', '2025-02-28', 152195400, 4756106, 122520, 0.994, 0.0, 0.0),
+  (4, 'Deep-subprime', 2, 'Debit', '2025-03-31', 152013600, 4750425, 122880, 0.974, 0.0, 0.0),
+  (4, 'Deep-subprime', 2, 'Debit', '2025-04-30', 157420200, 4919381, 123240, 0.989, 0.0, 0.0),
+  (4, 'Deep-subprime', 2, 'Debit', '2025-05-31', 154284000, 4821375, 123600, 0.992, 0.0, 0.0),
+  (4, 'Deep-subprime', 2, 'Debit', '2025-06-30', 155660400, 4864388, 123960, 0.968, 0.0, 0.0),
+  (4, 'Deep-subprime', 2, 'Debit', '2025-07-31', 160658400, 5020575, 124320, 0.977, 0.0, 0.0),
+  (4, 'Deep-subprime', 2, 'Debit', '2025-08-31', 153855000, 4807969, 124680, 0.965, 0.0, 0.0),
+  (4, 'Deep-subprime', 2, 'Debit', '2025-09-30', 160459200, 5014350, 125040, 0.988, 0.0, 0.0),
+  (4, 'Deep-subprime', 2, 'Debit', '2025-10-31', 156297000, 4884281, 125400, 0.978, 0.0, 0.0),
+  (4, 'Deep-subprime', 2, 'Debit', '2025-11-30', 176741040, 5523157, 125760, 0.985, 0.0, 0.0),
+  (4, 'Deep-subprime', 2, 'Debit', '2025-12-31', 179215740, 5600492, 126120, 0.99, 0.0, 0.0),
+  (4, 'Deep-subprime', 2, 'Debit', '2026-01-31', 161443200, 5045100, 126480, 0.993, 0.0, 0.0),
+  (4, 'Deep-subprime', 2, 'Debit', '2026-02-28', 159947400, 4998356, 126840, 0.983, 0.0, 0.0),
+  (4, 'Deep-subprime', 2, 'Debit', '2026-03-31', 159732000, 4991625, 127200, 0.975, 0.0, 0.0),
+  (4, 'Deep-subprime', 2, 'Debit', '2026-04-30', 162112200, 5066006, 127560, 0.965, 0.0, 0.0),
+  (4, 'Deep-subprime', 2, 'Debit', '2026-05-31', 160588800, 5018400, 127920, 0.971, 0.0, 0.0),
+  (4, 'Deep-subprime', 2, 'Debit', '2026-06-30', 164946600, 5154581, 128280, 0.976, 0.0, 0.0),
+  (4, 'Deep-subprime', 3, 'Prepaid', '2024-07-31', 170170000, 4051667, 130000, 0.962, 0.0, 0.0),
+  (4, 'Deep-subprime', 3, 'Prepaid', '2024-08-31', 167266400, 3982533, 130390, 0.976, 0.0, 0.0),
+  (4, 'Deep-subprime', 3, 'Prepaid', '2024-09-30', 168618240, 4014720, 130780, 0.962, 0.0, 0.0),
+  (4, 'Deep-subprime', 3, 'Prepaid', '2024-10-31', 172728160, 4112575, 131170, 0.958, 0.0, 0.0),
+  (4, 'Deep-subprime', 3, 'Prepaid', '2024-11-30', 233852517, 5567917, 131560, 0.975, 0.0, 0.0),
+  (4, 'Deep-subprime', 3, 'Prepaid', '2024-12-31', 229930134, 5474527, 131950, 0.984, 0.0, 0.0),
+  (4, 'Deep-subprime', 3, 'Prepaid', '2025-01-31', 174776320, 4161341, 132340, 0.955, 0.0, 0.0),
+  (4, 'Deep-subprime', 3, 'Prepaid', '2025-02-28', 178604720, 4252493, 132730, 0.966, 0.0, 0.0),
+  (4, 'Deep-subprime', 3, 'Prepaid', '2025-03-31', 179826000, 4281571, 133120, 0.98, 0.0, 0.0),
+  (4, 'Deep-subprime', 3, 'Prepaid', '2025-04-30', 179114040, 4264620, 133510, 0.981, 0.0, 0.0),
+  (4, 'Deep-subprime', 3, 'Prepaid', '2025-05-31', 173971200, 4142171, 133900, 0.971, 0.0, 0.0),
+  (4, 'Deep-subprime', 3, 'Prepaid', '2025-06-30', 177657480, 4229940, 134290, 0.984, 0.0, 0.0),
+  (4, 'Deep-subprime', 3, 'Prepaid', '2025-07-31', 176912880, 4212211, 134680, 0.983, 0.0, 0.0),
+  (4, 'Deep-subprime', 3, 'Prepaid', '2025-08-31', 177230440, 4219772, 135070, 0.984, 0.0, 0.0),
+  (4, 'Deep-subprime', 3, 'Prepaid', '2025-09-30', 183289920, 4364046, 135460, 0.976, 0.0, 0.0),
+  (4, 'Deep-subprime', 3, 'Prepaid', '2025-10-31', 183443600, 4367705, 135850, 0.985, 0.0, 0.0),
+  (4, 'Deep-subprime', 3, 'Prepaid', '2025-11-30', 246584660, 5871063, 136240, 0.965, 0.0, 0.0),
+  (4, 'Deep-subprime', 3, 'Prepaid', '2025-12-31', 235437930, 5605665, 136630, 0.966, 0.0, 0.0),
+  (4, 'Deep-subprime', 3, 'Prepaid', '2026-01-31', 181693280, 4326030, 137020, 0.971, 0.0, 0.0),
+  (4, 'Deep-subprime', 3, 'Prepaid', '2026-02-28', 180907880, 4307330, 137410, 0.967, 0.0, 0.0),
+  (4, 'Deep-subprime', 3, 'Prepaid', '2026-03-31', 179560800, 4275257, 137800, 0.957, 0.0, 0.0),
+  (4, 'Deep-subprime', 3, 'Prepaid', '2026-04-30', 180225840, 4291091, 138190, 0.963, 0.0, 0.0),
+  (4, 'Deep-subprime', 3, 'Prepaid', '2026-05-31', 180890880, 4306926, 138580, 0.973, 0.0, 0.0),
+  (4, 'Deep-subprime', 3, 'Prepaid', '2026-06-30', 186011280, 4428840, 138970, 0.967, 0.0, 0.0),
+  (4, 'Deep-subprime', 4, 'BNPL', '2024-07-31', 69510000, 993000, 60000, 0.427, 0.1081, 0.0752),
+  (4, 'Deep-subprime', 4, 'BNPL', '2024-08-31', 71334200, 1019060, 60180, 0.444, 0.1092, 0.0776),
+  (4, 'Deep-subprime', 4, 'BNPL', '2024-09-30', 70771680, 1011024, 60360, 0.454, 0.0966, 0.0736),
+  (4, 'Deep-subprime', 4, 'BNPL', '2024-10-31', 70344120, 1004916, 60540, 0.428, 0.1113, 0.0744),
+  (4, 'Deep-subprime', 4, 'BNPL', '2024-11-30', 104836570, 1497665, 60720, 0.441, 0.106, 0.0808),
+  (4, 'Deep-subprime', 4, 'BNPL', '2024-12-31', 105777672, 1511110, 60900, 0.43, 0.1008, 0.0856),
+  (4, 'Deep-subprime', 4, 'BNPL', '2025-01-31', 70461440, 1006592, 61080, 0.444, 0.126, 0.084),
+  (4, 'Deep-subprime', 4, 'BNPL', '2025-02-28', 70952560, 1013608, 61260, 0.439, 0.1352, 0.095),
+  (4, 'Deep-subprime', 4, 'BNPL', '2025-03-31', 72095520, 1029936, 61440, 0.439, 0.1018, 0.1008),
+  (4, 'Deep-subprime', 4, 'BNPL', '2025-04-30', 70924560, 1013208, 61620, 0.432, 0.1081, 0.0856),
+  (4, 'Deep-subprime', 4, 'BNPL', '2025-05-31', 72727200, 1038960, 61800, 0.444, 0.1008, 0.0856),
+  (4, 'Deep-subprime', 4, 'BNPL', '2025-06-30', 72203040, 1031472, 61980, 0.439, 0.1134, 0.0792),
+  (4, 'Deep-subprime', 4, 'BNPL', '2025-07-31', 72332960, 1033328, 62160, 0.436, 0.1092, 0.0832),
+  (4, 'Deep-subprime', 4, 'BNPL', '2025-08-31', 71799000, 1025700, 62340, 0.446, 0.1018, 0.0824),
+  (4, 'Deep-subprime', 4, 'BNPL', '2025-09-30', 74289600, 1061280, 62520, 0.448, 0.0976, 0.0776),
+  (4, 'Deep-subprime', 4, 'BNPL', '2025-10-31', 73754800, 1053640, 62700, 0.454, 0.1071, 0.0792),
+  (4, 'Deep-subprime', 4, 'BNPL', '2025-11-30', 111994086, 1599916, 62880, 0.446, 0.1113, 0.084),
+  (4, 'Deep-subprime', 4, 'BNPL', '2025-12-31', 109317062, 1561672, 63060, 0.455, 0.1134, 0.0864),
+  (4, 'Deep-subprime', 4, 'BNPL', '2026-01-31', 76165600, 1088080, 63240, 0.453, 0.1313, 0.0776),
+  (4, 'Deep-subprime', 4, 'BNPL', '2026-02-28', 73888920, 1055556, 63420, 0.453, 0.1286, 0.0941),
+  (4, 'Deep-subprime', 4, 'BNPL', '2026-03-31', 77263200, 1103760, 63600, 0.433, 0.1081, 0.0883),
+  (4, 'Deep-subprime', 4, 'BNPL', '2026-04-30', 75500600, 1078580, 63780, 0.439, 0.1071, 0.0768),
+  (4, 'Deep-subprime', 4, 'BNPL', '2026-05-31', 74484480, 1064064, 63960, 0.449, 0.1124, 0.0776),
+  (4, 'Deep-subprime', 4, 'BNPL', '2026-06-30', 77586600, 1108380, 64140, 0.443, 0.1092, 0.0848);
+
+INSERT INTO MACRO_STRESS_BETA (credit_tier, product, portfolio_metric, indicator_key, beta, note) VALUES
+  ('Prime', 'ALL', 'approval_rate', 'FED_FUNDS', -0.002, 'approval_rate change per +1pp Fed funds'),
+  ('Near-prime', 'ALL', 'approval_rate', 'FED_FUNDS', -0.006, 'approval_rate change per +1pp Fed funds'),
+  ('Subprime', 'ALL', 'approval_rate', 'FED_FUNDS', -0.014, 'approval_rate change per +1pp Fed funds'),
+  ('Deep-subprime', 'ALL', 'approval_rate', 'FED_FUNDS', -0.022, 'approval_rate change per +1pp Fed funds'),
+  ('Prime', 'ALL', 'charge_off_rate', 'UNEMPLOYMENT', 0.001, 'charge_off_rate change per +1pp unemployment'),
+  ('Near-prime', 'ALL', 'charge_off_rate', 'UNEMPLOYMENT', 0.004, 'charge_off_rate change per +1pp unemployment'),
+  ('Subprime', 'ALL', 'charge_off_rate', 'UNEMPLOYMENT', 0.012, 'charge_off_rate change per +1pp unemployment'),
+  ('Deep-subprime', 'ALL', 'charge_off_rate', 'UNEMPLOYMENT', 0.02, 'charge_off_rate change per +1pp unemployment'),
+  ('Prime', 'ALL', 'delinquency_rate_30d', 'UNEMPLOYMENT', 0.002, '30d delinquency change per +1pp unemployment'),
+  ('Near-prime', 'ALL', 'delinquency_rate_30d', 'UNEMPLOYMENT', 0.006, '30d delinquency change per +1pp unemployment'),
+  ('Subprime', 'ALL', 'delinquency_rate_30d', 'UNEMPLOYMENT', 0.016, '30d delinquency change per +1pp unemployment'),
+  ('Deep-subprime', 'ALL', 'delinquency_rate_30d', 'UNEMPLOYMENT', 0.026, '30d delinquency change per +1pp unemployment'),
+  ('Prime', 'ALL', 'transaction_volume_usd', 'SENTIMENT', 0.004, 'volume pct change per +1pt consumer sentiment'),
+  ('Near-prime', 'ALL', 'transaction_volume_usd', 'SENTIMENT', 0.005, 'volume pct change per +1pt consumer sentiment'),
+  ('Subprime', 'ALL', 'transaction_volume_usd', 'SENTIMENT', 0.006, 'volume pct change per +1pt consumer sentiment'),
+  ('Deep-subprime', 'ALL', 'transaction_volume_usd', 'SENTIMENT', 0.007, 'volume pct change per +1pt consumer sentiment');
+
+INSERT INTO MACRO_STRESS_APPETITE (credit_tier, charge_off_limit, watch_share) VALUES
+  ('Prime', 0.01, 0.8),
+  ('Near-prime', 0.03, 0.8),
+  ('Subprime', 0.07, 0.8),
+  ('Deep-subprime', 0.12, 0.8);
+
+INSERT INTO MACRO_STRESS_INDICATORS (indicator_key, indicator_name, source, unit, month_end, indicator_value) VALUES
+  ('CPI', 'CPI: All items (SA, 1982-84=100)', 'Bureau of Labor Statistics', 'Index', '2024-07-31', 310.0),
+  ('CPI', 'CPI: All items (SA, 1982-84=100)', 'Bureau of Labor Statistics', 'Index', '2024-08-31', 310.42),
+  ('CPI', 'CPI: All items (SA, 1982-84=100)', 'Bureau of Labor Statistics', 'Index', '2024-09-30', 310.84),
+  ('CPI', 'CPI: All items (SA, 1982-84=100)', 'Bureau of Labor Statistics', 'Index', '2024-10-31', 311.26),
+  ('CPI', 'CPI: All items (SA, 1982-84=100)', 'Bureau of Labor Statistics', 'Index', '2024-11-30', 311.68),
+  ('CPI', 'CPI: All items (SA, 1982-84=100)', 'Bureau of Labor Statistics', 'Index', '2024-12-31', 312.1),
+  ('CPI', 'CPI: All items (SA, 1982-84=100)', 'Bureau of Labor Statistics', 'Index', '2025-01-31', 312.52),
+  ('CPI', 'CPI: All items (SA, 1982-84=100)', 'Bureau of Labor Statistics', 'Index', '2025-02-28', 312.94),
+  ('CPI', 'CPI: All items (SA, 1982-84=100)', 'Bureau of Labor Statistics', 'Index', '2025-03-31', 313.36),
+  ('CPI', 'CPI: All items (SA, 1982-84=100)', 'Bureau of Labor Statistics', 'Index', '2025-04-30', 313.78),
+  ('CPI', 'CPI: All items (SA, 1982-84=100)', 'Bureau of Labor Statistics', 'Index', '2025-05-31', 314.2),
+  ('CPI', 'CPI: All items (SA, 1982-84=100)', 'Bureau of Labor Statistics', 'Index', '2025-06-30', 314.62),
+  ('CPI', 'CPI: All items (SA, 1982-84=100)', 'Bureau of Labor Statistics', 'Index', '2025-07-31', 315.04),
+  ('CPI', 'CPI: All items (SA, 1982-84=100)', 'Bureau of Labor Statistics', 'Index', '2025-08-31', 315.46),
+  ('CPI', 'CPI: All items (SA, 1982-84=100)', 'Bureau of Labor Statistics', 'Index', '2025-09-30', 315.88),
+  ('CPI', 'CPI: All items (SA, 1982-84=100)', 'Bureau of Labor Statistics', 'Index', '2025-10-31', 316.3),
+  ('CPI', 'CPI: All items (SA, 1982-84=100)', 'Bureau of Labor Statistics', 'Index', '2025-11-30', 316.72),
+  ('CPI', 'CPI: All items (SA, 1982-84=100)', 'Bureau of Labor Statistics', 'Index', '2025-12-31', 317.14),
+  ('CPI', 'CPI: All items (SA, 1982-84=100)', 'Bureau of Labor Statistics', 'Index', '2026-01-31', 317.56),
+  ('CPI', 'CPI: All items (SA, 1982-84=100)', 'Bureau of Labor Statistics', 'Index', '2026-02-28', 317.98),
+  ('CPI', 'CPI: All items (SA, 1982-84=100)', 'Bureau of Labor Statistics', 'Index', '2026-03-31', 318.4),
+  ('CPI', 'CPI: All items (SA, 1982-84=100)', 'Bureau of Labor Statistics', 'Index', '2026-04-30', 318.82),
+  ('CPI', 'CPI: All items (SA, 1982-84=100)', 'Bureau of Labor Statistics', 'Index', '2026-05-31', 319.24),
+  ('CPI', 'CPI: All items (SA, 1982-84=100)', 'Bureau of Labor Statistics', 'Index', '2026-06-30', 319.66),
+  ('UNEMPLOYMENT', 'Unemployment Rate (SA)', 'Bureau of Labor Statistics', 'Percent', '2024-07-31', 4.3),
+  ('UNEMPLOYMENT', 'Unemployment Rate (SA)', 'Bureau of Labor Statistics', 'Percent', '2024-08-31', 4.2),
+  ('UNEMPLOYMENT', 'Unemployment Rate (SA)', 'Bureau of Labor Statistics', 'Percent', '2024-09-30', 4.1),
+  ('UNEMPLOYMENT', 'Unemployment Rate (SA)', 'Bureau of Labor Statistics', 'Percent', '2024-10-31', 4.0),
+  ('UNEMPLOYMENT', 'Unemployment Rate (SA)', 'Bureau of Labor Statistics', 'Percent', '2024-11-30', 4.1),
+  ('UNEMPLOYMENT', 'Unemployment Rate (SA)', 'Bureau of Labor Statistics', 'Percent', '2024-12-31', 4.2),
+  ('UNEMPLOYMENT', 'Unemployment Rate (SA)', 'Bureau of Labor Statistics', 'Percent', '2025-01-31', 4.3),
+  ('UNEMPLOYMENT', 'Unemployment Rate (SA)', 'Bureau of Labor Statistics', 'Percent', '2025-02-28', 4.2),
+  ('UNEMPLOYMENT', 'Unemployment Rate (SA)', 'Bureau of Labor Statistics', 'Percent', '2025-03-31', 4.1),
+  ('UNEMPLOYMENT', 'Unemployment Rate (SA)', 'Bureau of Labor Statistics', 'Percent', '2025-04-30', 4.0),
+  ('UNEMPLOYMENT', 'Unemployment Rate (SA)', 'Bureau of Labor Statistics', 'Percent', '2025-05-31', 4.1),
+  ('UNEMPLOYMENT', 'Unemployment Rate (SA)', 'Bureau of Labor Statistics', 'Percent', '2025-06-30', 4.2),
+  ('UNEMPLOYMENT', 'Unemployment Rate (SA)', 'Bureau of Labor Statistics', 'Percent', '2025-07-31', 4.3),
+  ('UNEMPLOYMENT', 'Unemployment Rate (SA)', 'Bureau of Labor Statistics', 'Percent', '2025-08-31', 4.2),
+  ('UNEMPLOYMENT', 'Unemployment Rate (SA)', 'Bureau of Labor Statistics', 'Percent', '2025-09-30', 4.1),
+  ('UNEMPLOYMENT', 'Unemployment Rate (SA)', 'Bureau of Labor Statistics', 'Percent', '2025-10-31', 4.0),
+  ('UNEMPLOYMENT', 'Unemployment Rate (SA)', 'Bureau of Labor Statistics', 'Percent', '2025-11-30', 4.1),
+  ('UNEMPLOYMENT', 'Unemployment Rate (SA)', 'Bureau of Labor Statistics', 'Percent', '2025-12-31', 4.2),
+  ('UNEMPLOYMENT', 'Unemployment Rate (SA)', 'Bureau of Labor Statistics', 'Percent', '2026-01-31', 4.3),
+  ('UNEMPLOYMENT', 'Unemployment Rate (SA)', 'Bureau of Labor Statistics', 'Percent', '2026-02-28', 4.2),
+  ('UNEMPLOYMENT', 'Unemployment Rate (SA)', 'Bureau of Labor Statistics', 'Percent', '2026-03-31', 4.1),
+  ('UNEMPLOYMENT', 'Unemployment Rate (SA)', 'Bureau of Labor Statistics', 'Percent', '2026-04-30', 4.0),
+  ('UNEMPLOYMENT', 'Unemployment Rate (SA)', 'Bureau of Labor Statistics', 'Percent', '2026-05-31', 4.1),
+  ('UNEMPLOYMENT', 'Unemployment Rate (SA)', 'Bureau of Labor Statistics', 'Percent', '2026-06-30', 4.2),
+  ('FED_FUNDS', 'Effective Federal Funds Rate (EFFR)', 'New York Fed', 'Percent', '2024-07-31', 5.33),
+  ('FED_FUNDS', 'Effective Federal Funds Rate (EFFR)', 'New York Fed', 'Percent', '2024-08-31', 5.29),
+  ('FED_FUNDS', 'Effective Federal Funds Rate (EFFR)', 'New York Fed', 'Percent', '2024-09-30', 5.24),
+  ('FED_FUNDS', 'Effective Federal Funds Rate (EFFR)', 'New York Fed', 'Percent', '2024-10-31', 5.2),
+  ('FED_FUNDS', 'Effective Federal Funds Rate (EFFR)', 'New York Fed', 'Percent', '2024-11-30', 5.15),
+  ('FED_FUNDS', 'Effective Federal Funds Rate (EFFR)', 'New York Fed', 'Percent', '2024-12-31', 5.11),
+  ('FED_FUNDS', 'Effective Federal Funds Rate (EFFR)', 'New York Fed', 'Percent', '2025-01-31', 5.06),
+  ('FED_FUNDS', 'Effective Federal Funds Rate (EFFR)', 'New York Fed', 'Percent', '2025-02-28', 5.01),
+  ('FED_FUNDS', 'Effective Federal Funds Rate (EFFR)', 'New York Fed', 'Percent', '2025-03-31', 4.97),
+  ('FED_FUNDS', 'Effective Federal Funds Rate (EFFR)', 'New York Fed', 'Percent', '2025-04-30', 4.92),
+  ('FED_FUNDS', 'Effective Federal Funds Rate (EFFR)', 'New York Fed', 'Percent', '2025-05-31', 4.88),
+  ('FED_FUNDS', 'Effective Federal Funds Rate (EFFR)', 'New York Fed', 'Percent', '2025-06-30', 4.83),
+  ('FED_FUNDS', 'Effective Federal Funds Rate (EFFR)', 'New York Fed', 'Percent', '2025-07-31', 4.79),
+  ('FED_FUNDS', 'Effective Federal Funds Rate (EFFR)', 'New York Fed', 'Percent', '2025-08-31', 4.75),
+  ('FED_FUNDS', 'Effective Federal Funds Rate (EFFR)', 'New York Fed', 'Percent', '2025-09-30', 4.7),
+  ('FED_FUNDS', 'Effective Federal Funds Rate (EFFR)', 'New York Fed', 'Percent', '2025-10-31', 4.66),
+  ('FED_FUNDS', 'Effective Federal Funds Rate (EFFR)', 'New York Fed', 'Percent', '2025-11-30', 4.61),
+  ('FED_FUNDS', 'Effective Federal Funds Rate (EFFR)', 'New York Fed', 'Percent', '2025-12-31', 4.57),
+  ('FED_FUNDS', 'Effective Federal Funds Rate (EFFR)', 'New York Fed', 'Percent', '2026-01-31', 4.52),
+  ('FED_FUNDS', 'Effective Federal Funds Rate (EFFR)', 'New York Fed', 'Percent', '2026-02-28', 4.47),
+  ('FED_FUNDS', 'Effective Federal Funds Rate (EFFR)', 'New York Fed', 'Percent', '2026-03-31', 4.43),
+  ('FED_FUNDS', 'Effective Federal Funds Rate (EFFR)', 'New York Fed', 'Percent', '2026-04-30', 4.38),
+  ('FED_FUNDS', 'Effective Federal Funds Rate (EFFR)', 'New York Fed', 'Percent', '2026-05-31', 4.34),
+  ('FED_FUNDS', 'Effective Federal Funds Rate (EFFR)', 'New York Fed', 'Percent', '2026-06-30', 4.3),
+  ('PCE', 'PCE Price Index (SA, 2017=100)', 'Bureau of Economic Analysis', 'Index', '2024-07-31', 122.0),
+  ('PCE', 'PCE Price Index (SA, 2017=100)', 'Bureau of Economic Analysis', 'Index', '2024-08-31', 122.28),
+  ('PCE', 'PCE Price Index (SA, 2017=100)', 'Bureau of Economic Analysis', 'Index', '2024-09-30', 122.56),
+  ('PCE', 'PCE Price Index (SA, 2017=100)', 'Bureau of Economic Analysis', 'Index', '2024-10-31', 122.84),
+  ('PCE', 'PCE Price Index (SA, 2017=100)', 'Bureau of Economic Analysis', 'Index', '2024-11-30', 123.12),
+  ('PCE', 'PCE Price Index (SA, 2017=100)', 'Bureau of Economic Analysis', 'Index', '2024-12-31', 123.4),
+  ('PCE', 'PCE Price Index (SA, 2017=100)', 'Bureau of Economic Analysis', 'Index', '2025-01-31', 123.68),
+  ('PCE', 'PCE Price Index (SA, 2017=100)', 'Bureau of Economic Analysis', 'Index', '2025-02-28', 123.96),
+  ('PCE', 'PCE Price Index (SA, 2017=100)', 'Bureau of Economic Analysis', 'Index', '2025-03-31', 124.24),
+  ('PCE', 'PCE Price Index (SA, 2017=100)', 'Bureau of Economic Analysis', 'Index', '2025-04-30', 124.52),
+  ('PCE', 'PCE Price Index (SA, 2017=100)', 'Bureau of Economic Analysis', 'Index', '2025-05-31', 124.8),
+  ('PCE', 'PCE Price Index (SA, 2017=100)', 'Bureau of Economic Analysis', 'Index', '2025-06-30', 125.08),
+  ('PCE', 'PCE Price Index (SA, 2017=100)', 'Bureau of Economic Analysis', 'Index', '2025-07-31', 125.36),
+  ('PCE', 'PCE Price Index (SA, 2017=100)', 'Bureau of Economic Analysis', 'Index', '2025-08-31', 125.64),
+  ('PCE', 'PCE Price Index (SA, 2017=100)', 'Bureau of Economic Analysis', 'Index', '2025-09-30', 125.92),
+  ('PCE', 'PCE Price Index (SA, 2017=100)', 'Bureau of Economic Analysis', 'Index', '2025-10-31', 126.2),
+  ('PCE', 'PCE Price Index (SA, 2017=100)', 'Bureau of Economic Analysis', 'Index', '2025-11-30', 126.48),
+  ('PCE', 'PCE Price Index (SA, 2017=100)', 'Bureau of Economic Analysis', 'Index', '2025-12-31', 126.76),
+  ('PCE', 'PCE Price Index (SA, 2017=100)', 'Bureau of Economic Analysis', 'Index', '2026-01-31', 127.04),
+  ('PCE', 'PCE Price Index (SA, 2017=100)', 'Bureau of Economic Analysis', 'Index', '2026-02-28', 127.32),
+  ('PCE', 'PCE Price Index (SA, 2017=100)', 'Bureau of Economic Analysis', 'Index', '2026-03-31', 127.6),
+  ('PCE', 'PCE Price Index (SA, 2017=100)', 'Bureau of Economic Analysis', 'Index', '2026-04-30', 127.88),
+  ('PCE', 'PCE Price Index (SA, 2017=100)', 'Bureau of Economic Analysis', 'Index', '2026-05-31', 128.16),
+  ('PCE', 'PCE Price Index (SA, 2017=100)', 'Bureau of Economic Analysis', 'Index', '2026-06-30', 128.44),
+  ('SENTIMENT', 'Index of Consumer Sentiment', 'University of Michigan', 'Index', '2024-07-31', 67.0),
+  ('SENTIMENT', 'Index of Consumer Sentiment', 'University of Michigan', 'Index', '2024-08-31', 67.98),
+  ('SENTIMENT', 'Index of Consumer Sentiment', 'University of Michigan', 'Index', '2024-09-30', 68.86),
+  ('SENTIMENT', 'Index of Consumer Sentiment', 'University of Michigan', 'Index', '2024-10-31', 69.52),
+  ('SENTIMENT', 'Index of Consumer Sentiment', 'University of Michigan', 'Index', '2024-11-30', 69.92),
+  ('SENTIMENT', 'Index of Consumer Sentiment', 'University of Michigan', 'Index', '2024-12-31', 69.99),
+  ('SENTIMENT', 'Index of Consumer Sentiment', 'University of Michigan', 'Index', '2025-01-31', 69.73),
+  ('SENTIMENT', 'Index of Consumer Sentiment', 'University of Michigan', 'Index', '2025-02-28', 69.17),
+  ('SENTIMENT', 'Index of Consumer Sentiment', 'University of Michigan', 'Index', '2025-03-31', 68.37),
+  ('SENTIMENT', 'Index of Consumer Sentiment', 'University of Michigan', 'Index', '2025-04-30', 67.42),
+  ('SENTIMENT', 'Index of Consumer Sentiment', 'University of Michigan', 'Index', '2025-05-31', 66.43),
+  ('SENTIMENT', 'Index of Consumer Sentiment', 'University of Michigan', 'Index', '2025-06-30', 65.5),
+  ('SENTIMENT', 'Index of Consumer Sentiment', 'University of Michigan', 'Index', '2025-07-31', 64.73),
+  ('SENTIMENT', 'Index of Consumer Sentiment', 'University of Michigan', 'Index', '2025-08-31', 64.21),
+  ('SENTIMENT', 'Index of Consumer Sentiment', 'University of Michigan', 'Index', '2025-09-30', 64.0),
+  ('SENTIMENT', 'Index of Consumer Sentiment', 'University of Michigan', 'Index', '2025-10-31', 64.12),
+  ('SENTIMENT', 'Index of Consumer Sentiment', 'University of Michigan', 'Index', '2025-11-30', 64.56),
+  ('SENTIMENT', 'Index of Consumer Sentiment', 'University of Michigan', 'Index', '2025-12-31', 65.27),
+  ('SENTIMENT', 'Index of Consumer Sentiment', 'University of Michigan', 'Index', '2026-01-31', 66.16),
+  ('SENTIMENT', 'Index of Consumer Sentiment', 'University of Michigan', 'Index', '2026-02-28', 67.15),
+  ('SENTIMENT', 'Index of Consumer Sentiment', 'University of Michigan', 'Index', '2026-03-31', 68.12),
+  ('SENTIMENT', 'Index of Consumer Sentiment', 'University of Michigan', 'Index', '2026-04-30', 68.97),
+  ('SENTIMENT', 'Index of Consumer Sentiment', 'University of Michigan', 'Index', '2026-05-31', 69.6),
+  ('SENTIMENT', 'Index of Consumer Sentiment', 'University of Michigan', 'Index', '2026-06-30', 69.95);
+-- END GENERATED DATA
+
+-- 3. Benchmark wide view (single pre-joined view for the semantic view) -------
 --    Fact grain = (segment_id, product_id, month_end). Macro pre-aggregated to (month_end)
 --    then joined on month_end, so each macro column repeats across segment x product rows
 --    and MUST be exposed as a non-additive AVG metric (never SUM) in the SV.
@@ -164,12 +649,62 @@ SELECT f.segment_id, f.credit_tier, f.product_id, f.product, f.month_end,
 FROM MACRO_STRESS_PORTFOLIO_MONTHLY f
 JOIN macro mo USING (month_end);
 
--- 6. Data-source marker -------------------------------------------------------
+-- 4. What-if scenario as a SQL table function ------------------------------------
+--    Applies the betas to the latest month of every pool. Sentiment responds to the shock
+--    with an illustrative elasticity of -(1.5 x Fed funds pp + 4 x unemployment pp).
+--    Pass FLOAT arguments: SELECT * FROM TABLE(MACRO_STRESS_SCENARIO(200::FLOAT, 1::FLOAT));
+CREATE OR REPLACE FUNCTION MACRO_STRESS_SCENARIO(FED_BPS FLOAT, UNEMP_PP FLOAT)
+RETURNS TABLE (
+  credit_tier STRING, product STRING, month_end DATE,
+  volume_base FLOAT, volume_stress FLOAT, approval_base FLOAT, approval_stress FLOAT,
+  delinquency_base FLOAT, delinquency_stress FLOAT, charge_off_base FLOAT, charge_off_stress FLOAT,
+  charge_off_limit FLOAT, status STRING, sentiment_delta FLOAT
+)
+COMMENT = 'Latest-month portfolio under a Fed funds (bps) and unemployment (pp) shock, using MACRO_STRESS_BETA and MACRO_STRESS_APPETITE.'
+AS
+$$
+  WITH b AS (
+    SELECT credit_tier,
+      MAX(IFF(portfolio_metric='approval_rate', beta, NULL))          AS b_appr,
+      MAX(IFF(portfolio_metric='delinquency_rate_30d', beta, NULL))   AS b_dq,
+      MAX(IFF(portfolio_metric='charge_off_rate', beta, NULL))        AS b_co,
+      MAX(IFF(portfolio_metric='transaction_volume_usd', beta, NULL)) AS b_vol
+    FROM SNOWPACK_MACRO_STRESS.CORE.MACRO_STRESS_BETA GROUP BY credit_tier
+  ), p AS (
+    SELECT * FROM SNOWPACK_MACRO_STRESS.CORE.MACRO_STRESS_PORTFOLIO_MONTHLY
+    WHERE month_end = (SELECT MAX(month_end) FROM SNOWPACK_MACRO_STRESS.CORE.MACRO_STRESS_PORTFOLIO_MONTHLY)
+  ), s AS (
+    SELECT p.segment_id, p.product_id, p.credit_tier, p.product, p.month_end,
+      p.transaction_volume_usd::FLOAT AS volume_base,
+      p.transaction_volume_usd * (1 + b.b_vol * (-(1.5 * FED_BPS / 100 + 4 * UNEMP_PP))) AS volume_stress,
+      p.approval_rate AS approval_base,
+      LEAST(0.999, GREATEST(0.30, p.approval_rate + b.b_appr * FED_BPS / 100)) AS approval_stress,
+      p.delinquency_rate_30d AS delinquency_base,
+      IFF(p.delinquency_rate_30d > 0, GREATEST(0, p.delinquency_rate_30d + b.b_dq * UNEMP_PP), 0) AS delinquency_stress,
+      p.charge_off_rate AS charge_off_base,
+      IFF(p.charge_off_rate > 0, GREATEST(0, p.charge_off_rate + b.b_co * UNEMP_PP), 0) AS charge_off_stress,
+      a.charge_off_limit, a.watch_share,
+      -(1.5 * FED_BPS / 100 + 4 * UNEMP_PP) AS sentiment_delta
+    FROM p JOIN b ON b.credit_tier = p.credit_tier
+           JOIN SNOWPACK_MACRO_STRESS.CORE.MACRO_STRESS_APPETITE a ON a.credit_tier = p.credit_tier
+  )
+  SELECT credit_tier, product, month_end, volume_base, volume_stress, approval_base, approval_stress,
+         delinquency_base, delinquency_stress, charge_off_base, charge_off_stress, charge_off_limit,
+         CASE WHEN charge_off_base = 0 THEN 'No credit risk'
+              WHEN charge_off_stress > charge_off_limit THEN 'Breach'
+              WHEN charge_off_stress >= watch_share * charge_off_limit THEN 'Watch'
+              ELSE 'Within appetite' END AS status,
+         sentiment_delta
+  FROM s
+  ORDER BY segment_id, product_id
+$$;
+
+-- 5. Data-source marker -------------------------------------------------------
 CREATE OR REPLACE VIEW MACRO_STRESS_DATA_SOURCE_INFO AS
 SELECT 'synthetic' AS mode,
        'Synthetic payment portfolio AND synthetic macro indicators (no Marketplace listing required). Run setup.sql to stress-test the synthetic portfolio against REAL Cybersyn economic indicators (free Financial Data Package: CPI, unemployment, Fed funds, PCE, consumer sentiment).' AS note;
 
--- 7. Semantic view (single wide view; macro columns are non-additive AVG) -----
+-- 6. Semantic view (single wide view; macro columns are non-additive AVG) -----
 CREATE OR REPLACE SEMANTIC VIEW MACRO_STRESS_SV
   TABLES ( ms AS SNOWPACK_MACRO_STRESS.CORE.MACRO_STRESS_BENCHMARK PRIMARY KEY (segment_id, product_id, month_end)
            WITH SYNONYMS = ('macro stress','portfolio vs macro','stress test','portfolio health')
@@ -211,21 +746,22 @@ CREATE OR REPLACE SEMANTIC VIEW MACRO_STRESS_SV
   )
   COMMENT = 'Macro stress semantic view (synthetic portfolio vs macro indicators). Macro columns are non-additive AVG metrics.';
 
--- 8. Output table + agent -----------------------------------------------------
+-- 7. Output table + agent -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS MACRO_STRESS_REPORTS (
-  run_id STRING DEFAULT UUID_STRING(), subject STRING, draft_md STRING, report_md STRING,
-  status STRING, edits_applied INT, residual_hedges INT, created_at TIMESTAMP_LTZ DEFAULT CURRENT_TIMESTAMP()
+  run_id STRING DEFAULT UUID_STRING(), subject STRING, scenario STRING, draft_md STRING, report_md STRING,
+  status STRING, edits_applied INT, residual_hedges INT, verifier_json VARIANT,
+  created_at TIMESTAMP_NTZ DEFAULT SYSDATE()
 );
 
 CREATE OR REPLACE AGENT MACRO_STRESS_AGENT
   COMMENT = 'Macro Stress Testing agent (Cortex Analyst over MACRO_STRESS_SV)'
-  PROFILE = '{"display_name": "Macro Stress Agent", "color": "blue"}'
+  PROFILE = '{"display_name": "Macro Stress Agent", "color": "orange"}'
   FROM SPECIFICATION
   $$
   models:
     orchestration: auto
   instructions:
-    response: 'You are a payments risk and finance analyst. Use ONLY figures from the Analyst tool. Macro columns (CPI, unemployment, Fed funds, PCE, consumer sentiment) are non-additive -- use their AVG metrics, never sum them. Rates are decimals (0.04 = 4%); unemployment and Fed funds are in percentage points. Express USD in $B/$M. Never invent numbers. Be concise and cite the month.'
+    response: 'You are a payments risk and finance analyst. Use ONLY figures from the Analyst tool. Macro columns (CPI, unemployment, Fed funds, PCE, consumer sentiment) are non-additive -- use their AVG metrics, never sum them. Rates are decimals (0.04 = 4%); unemployment and Fed funds are in percentage points. Express USD in $B/$M. Never invent numbers. Never name a real company. Be concise and cite the month.'
     orchestration: 'For any portfolio volume, approval, delinquency, charge-off, holiday-season, or macro-backdrop question use the MacroStress Analyst tool. For what-if elasticity ("+200 bps Fed funds") reference MACRO_STRESS_BETA.'
     sample_questions:
       - question: 'How did holiday-season (Nov-Dec) transaction volume track against consumer sentiment over the last two years?'
@@ -234,8 +770,18 @@ CREATE OR REPLACE AGENT MACRO_STRESS_AGENT
     - tool_spec:
         type: cortex_analyst_text_to_sql
         name: MacroStress
-        description: 'Synthetic payment portfolio (volume, approval, delinquency, charge-off) by credit tier/product/month vs real macro indicators (CPI, unemployment, Fed funds, PCE, consumer sentiment).'
+        description: 'Synthetic payment portfolio (volume, approval, delinquency, charge-off) by credit tier/product/month vs macro indicators (CPI, unemployment, Fed funds, PCE, consumer sentiment).'
   tool_resources:
     MacroStress:
       semantic_view: SNOWPACK_MACRO_STRESS.CORE.MACRO_STRESS_SV
+      execution_environment:
+        type: warehouse
+        warehouse: SNOWPACK_MACRO_STRESS_WH
   $$;
+
+-- 8. Hand back account-level privileges -------------------------------------------
+--    The pack role keeps ownership of its own database and warehouse, nothing more.
+USE ROLE ACCOUNTADMIN;
+REVOKE CREATE DATABASE, CREATE WAREHOUSE ON ACCOUNT FROM ROLE SNOWPACK_MACRO_STRESS_ROLE;
+USE ROLE SNOWPACK_MACRO_STRESS_ROLE;
+SELECT 'Setup complete' AS status, COUNT(*) AS portfolio_rows FROM SNOWPACK_MACRO_STRESS.CORE.MACRO_STRESS_PORTFOLIO_MONTHLY;

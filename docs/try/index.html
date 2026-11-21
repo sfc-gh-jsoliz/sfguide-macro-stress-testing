@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Halvorn Stress Desk · Macro Stress Testing (hosted example)</title>
+<meta name="description" content="Stress-test a synthetic payments book against the macro cycle. Hosted example in Sample mode; no Snowflake account needed.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='1' y='1' width='30' height='30' rx='7' fill='%231F2328'/%3E%3Cpath d='M5 8 C 13 9, 19 14, 27 23' stroke='%23D9693D' stroke-width='2.4' fill='none'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<header class="bar">
+  <div class="bar-in">
+    <button class="icon-btn menu-btn" id="menu" aria-label="Open navigation">☰</button>
+    <a class="brand" href="../" aria-label="Halvorn Stress Desk: back to the guide">
+      <svg viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect x="1" y="1" width="30" height="30" rx="7" fill="#2B3036"/><rect x="7" y="9" width="4" height="15" rx="1" fill="#E9DFCC"/><rect x="14" y="13" width="4" height="11" rx="1" fill="#E9DFCC"/><rect x="21" y="17" width="4" height="7" rx="1" fill="#E9DFCC"/><path d="M5 8 C 13 9, 19 14, 27 23" stroke="#D9693D" stroke-width="2.4" fill="none" stroke-linecap="round"/></svg>
+      <b>HALVORN</b><span>Stress Desk</span>
+    </a>
+    <nav class="tabs" role="tablist" aria-label="Screens">
+      <button class="tab" role="tab" data-tab="pulse" aria-selected="true">Pulse</button>
+      <button class="tab" role="tab" data-tab="lab" aria-selected="false">Scenario lab</button>
+      <button class="tab" role="tab" data-tab="pools" aria-selected="false">Pools</button>
+      <button class="tab" role="tab" data-tab="notes" aria-selected="false">Stress notes</button>
+      <button class="tab" role="tab" data-tab="ask" aria-selected="false">Ask</button>
+    </nav>
+    <div class="bar-right">
+      <div class="switch" role="group" aria-label="Data mode">
+        <button aria-pressed="true">Sample</button>
+        <button id="mode-live" aria-pressed="false">Live</button>
+      </div>
+      <span class="env" title="Hosted example: synthetic data, captured AI responses">SAMPLE · SYNTHETIC</span>
+      <button class="icon-btn" id="theme" aria-label="Toggle dark mode">◐</button>
+      <div class="chip-user"><i>RO</i><div>R. Okafor<small>Portfolio risk · Quillmar</small></div></div>
+    </div>
+  </div>
+</header>
+<div class="strip"><div class="strip-in"><strong>Hosted example, Sample mode.</strong> Fictional processor, synthetic data. AI answers were captured from a Live run and are labeled “Sample AI response”. <a href="https://github.com/sfc-gh-jsoliz/sfguide-macro-stress-testing">Run it on Snowflake</a></div></div>
+
+<div class="wrap">
+<main>
+  <div id="boot-error"></div>
+
+  <section class="screen on" id="s-pulse" aria-label="Pulse">
+    <div class="head"><div><div class="eyebrow">Portfolio pulse · Quillmar Payments</div><h1>How the book reads under the scenario</h1><p id="pulse-sub">Loading the June 2026 book…</p></div><span class="powered">Powered by MACRO_STRESS_SCENARIO</span></div>
+    <div class="grid g-kpi" id="kpis">
+      <div class="card"><div class="sk" style="height:76px"></div></div><div class="card"><div class="sk" style="height:76px"></div></div><div class="card"><div class="sk" style="height:76px"></div></div><div class="card"><div class="sk" style="height:76px"></div></div><div class="card"><div class="sk" style="height:76px"></div></div>
+    </div>
+    <div class="grid g-2 mt">
+      <div class="card"><div class="card-h"><div><h2>Monthly volume by credit tier</h2><p>July 2024 to June 2026, baseline. November and December shaded.</p></div><span class="powered">MACRO_STRESS_BENCHMARK</span></div><div class="chart" id="vol-chart"></div><div id="vol-legend"></div></div>
+      <div class="card"><div class="card-h"><div><h2>Macro backdrop</h2><p>Monthly averages; non-additive across pools.</p></div><span class="powered">MACRO_STRESS_INDICATORS</span></div><div class="chart" id="macro-chart"></div><div class="chart mt" id="sent-chart"></div></div>
+    </div>
+    <div class="grid g-2 mt">
+      <div class="card"><div class="card-h"><div><h2>Credit health after the holidays</h2><p>Volume-weighted, credit products. Delinquency peaks in Jan–Feb, charge-off a month later.</p></div></div><div class="chart" id="dq-chart"></div></div>
+      <div class="card"><h2>What the data shows</h2>
+        <div class="insight mt"><span class="ix">01</span><div><b>Holiday peak, then a delinquency lift</b><p>Book volume rose from $4.94B in October to $6.14B in December 2025; 30-day delinquency on credit products went from 3.26% to 4.02% in January.</p><button class="link" data-pool="Deep-subprime|BNPL">See Deep-subprime BNPL →</button></div></div>
+        <div class="insight mt"><span class="ix">02</span><div><b>Risk concentrates down the tiers</b><p>Deep-subprime charge-off moves 2.0 points per +1 pp unemployment, twenty times Prime.</p><button class="link" data-go="lab">Open the scenario lab →</button></div></div>
+        <div class="insight mt"><span class="ix">03</span><div><b>A verifier gates every note</b><p>Stress notes cite numbered facts; an injected forecast is flagged Needs review.</p><button class="link" data-go="notes">Read the notes →</button></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen" id="s-lab" aria-label="Scenario lab">
+    <div class="head"><div><div class="eyebrow">Scenario lab · June 2026</div><h1>Charge-off against appetite, pool by pool</h1><p>Each cell is a credit tier and product under the scenario. Limits come from MACRO_STRESS_APPETITE; Watch starts at 80% of the limit. Tap a cell for its history.</p></div><span class="powered">Powered by MACRO_STRESS_SCENARIO</span></div>
+    <div class="card"><div class="heat" id="heat"></div>
+      <div class="legend"><span class="pill p-ok">Within appetite</span><span class="pill p-watch">Watch</span><span class="pill p-breach">Breach</span><span class="pill p-none">No credit risk</span></div></div>
+    <div class="grid mt">
+      <div class="card"><div class="card-h"><div><h2>Stress fan: charge-off vs unemployment shock</h2><p>Volume-weighted per tier at the current Fed funds shock. The copper line marks the scenario.</p></div><span class="powered">MACRO_STRESS_BETA</span></div><div class="chart" id="fan"></div><div id="fan-legend"></div></div>
+      <div class="card"><div class="card-h"><div><h2>By tier</h2><p>Scenario value and change vs baseline. Tap a tier to filter pools.</p></div></div>
+        <div class="tbl-wrap"><table><thead><tr><th>Tier</th><th class="n">Approval</th><th class="n">30d delinq.</th><th class="n">Charge-off</th><th class="n">Limit</th><th>Status</th></tr></thead><tbody id="tier-body"></tbody></table></div></div>
+    </div>
+  </section>
+
+  <section class="screen" id="s-pools" aria-label="Pools">
+    <div class="head"><div><div class="eyebrow">Pools · 4 tiers × 4 products</div><h1>Every pool under the scenario</h1><p>Sort any column, filter, and open a pool for 24 months of history and its betas.</p></div><span class="powered" id="pool-count"></span></div>
+    <div class="card">
+      <div class="filters">
+        <label class="sr-only" for="f-tier">Tier</label><select id="f-tier"></select>
+        <label class="sr-only" for="f-product">Product</label><select id="f-product"></select>
+        <label class="sr-only" for="f-status">Status</label><select id="f-status"><option value="">All statuses</option><option>Breach</option><option>Watch</option><option>Within appetite</option><option>No credit risk</option></select>
+        <label class="sr-only" for="f-q">Search</label><input id="f-q" type="search" placeholder="Search pools">
+      </div>
+      <div class="tbl-wrap"><table><thead><tr id="pool-head"></tr></thead><tbody id="pool-body"></tbody></table></div>
+    </div>
+  </section>
+
+  <section class="screen" id="s-notes" aria-label="Stress notes">
+    <div class="head"><div><div class="eyebrow">Stress notes · grounded draft + verifier</div><h1>A committee note where every number cites a fact</h1><p>AI_COMPLETE drafts the note from a numbered fact pack, then a second AI_COMPLETE pass checks every claim and marks it Verified or Needs review.</p></div><span class="powered">Powered by Cortex AI_COMPLETE</span></div>
+    <div class="grid g-2">
+      <div>
+        <div class="card">
+          <div class="form-row">
+            <label for="note-tier">Subject</label><select id="note-tier"></select>
+            <label class="check"><input type="checkbox" id="note-inject"> Inject an unsupported forecast</label>
+            <button class="btn btn-primary" id="note-run">Generate stress note</button>
+          </div>
+          <div id="note-gate" class="mt"></div>
+        </div>
+        <div class="card mt" id="note-body" aria-live="polite"></div>
+      </div>
+      <div>
+        <div class="card"><h2>Fact pack</h2><p style="color:var(--muted);font-size:12px;margin:4px 0 8px">The only numbers the note may use. Hover a citation in the note to find its fact.</p><ul class="facts" id="facts"></ul></div>
+        <div class="card mt"><h2>Note history</h2><ul class="history mt" id="history"></ul></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen" id="s-ask" aria-label="Ask">
+    <div class="head"><div><div class="eyebrow">Ask · Cortex Agent over a semantic view</div><h1>Ask the book a question in plain English</h1><p>The Macro Stress Agent uses Cortex Analyst over the MACRO_STRESS_SV semantic view and shows the SQL it ran.</p></div><span class="powered">Powered by Cortex Agents</span></div>
+    <div class="card"><h2>Try a question</h2><div class="suggest mt" id="suggest"></div></div>
+    <div class="card mt"><div class="chat" id="chat" aria-live="polite"></div>
+      <form class="ask-row" id="ask-form"><label class="sr-only" for="ask-input">Your question</label><input id="ask-input" placeholder="Ask about volume, delinquency, charge-off or the macro backdrop"><button class="btn btn-primary">Ask</button></form></div>
+  </section>
+</main>
+
+<aside class="rail" aria-label="Scenario">
+  <button class="sheet-bar" id="sheet-bar" aria-expanded="false"><span><small class="eyebrow">Scenario</small><span id="sheet-sum"></span></span><span class="btn">Adjust</span></button>
+  <div class="card dial">
+    <div class="eyebrow">Scenario · shock dials</div>
+    <label for="fed">Fed funds shock <b id="fed-v"></b></label><input type="range" id="fed" min="0" max="300" step="25">
+    <label for="un">Unemployment shock <b id="un-v"></b></label><input type="range" id="un" min="0" max="3" step="0.25">
+    <div class="presets" id="presets">
+      <button class="btn" data-fed="50" data-un="0.5">Mild</button>
+      <button class="btn" data-fed="200" data-un="1">Base case</button>
+      <button class="btn" data-fed="300" data-un="2">Severe</button>
+      <button class="btn" data-fed="0" data-un="3">2008-style</button>
+    </div>
+    <button class="link mt" id="reset">Reset to baseline</button>
+    <div class="rail-sum" id="rail-sum"></div>
+  </div>
+  <div class="card" style="font-size:12px;color:var(--muted)">Betas from MACRO_STRESS_BETA move each tier: approval with Fed funds; delinquency and charge-off with unemployment; volume with a modeled sentiment response. Debit and prepaid carry no credit risk.</div>
+</aside>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-label="Pool detail"></aside>
+
+<div class="modal" id="live-modal" role="dialog" aria-modal="true" aria-labelledby="live-title">
+  <div class="card">
+    <h2 id="live-title">Live mode runs in your Snowflake account</h2>
+    <p>This hosted example is always Sample mode. To run the same screens on Snowflake:</p>
+    <ol>
+      <li>Run <code>app/setup_synthetic.sql</code> in a worksheet (about 15 seconds on an XSMALL warehouse).</li>
+      <li>Deploy <code>app/streamlit_app.py</code> as Streamlit in Snowflake, or run it locally with key-pair auth.</li>
+      <li>Switch the app header to Live.</li>
+    </ol>
+    <p>The browser never asks for Snowflake credentials.</p>
+    <div class="form-row"><a class="btn btn-primary" href="https://github.com/sfc-gh-jsoliz/sfguide-macro-stress-testing#run-live-mode" style="text-decoration:none">Open the Live-mode guide</a><button class="btn" id="live-close">Stay in Sample</button></div>
+  </div>
+</div>
+
+<footer>Halvorn and Quillmar Payments are fictional. Synthetic data and illustrative logic; not production, regulatory or financial advice. An example, not an official Snowflake product. Owner: Javier Soliz.</footer>
+<script src="app.js"></script>
+</body>
+</html>
