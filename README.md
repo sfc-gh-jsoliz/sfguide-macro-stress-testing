@@ -91,8 +91,8 @@ Measured in November 2026 on an XSMALL warehouse:
 
 - `setup_synthetic.sql`: 38 statements in about 15 seconds.
 - `MACRO_STRESS_SCENARIO` returns in under a second; the app calls it on every dial change in Live mode.
-- One stress note (two `AI_COMPLETE` calls): 6.6 to 9.1 seconds across 24 captured notes.
-- One Cortex Agent answer: 12.5 to 28.5 seconds across 6 questions.
+- One stress note (two `AI_COMPLETE` calls): 6.6 to 9.2 seconds across 26 Live notes.
+- One Cortex Agent answer: 12.0 to 28.5 seconds across 7 Live questions.
 - Warehouse compute for setup plus a session of clicking around is a small fraction of a credit (well under 0.1; estimate from run time, as metering had not reported when we cleaned up). `AI_COMPLETE` and Cortex Agent calls bill Cortex credits per token on top; we didn't measure them, so check `SNOWFLAKE.ACCOUNT_USAGE.CORTEX_AISQL_USAGE_HISTORY` in your account.
 
 ## What was verified live
